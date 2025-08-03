@@ -1,4 +1,6 @@
 const express = require('express');
+const http = require('http');
+const { Server } = require("socket.io");
 const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -28,6 +30,19 @@ const loyaltyRoutes = require('./api/routes/loyalty.routes');
 connectDB();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Configure this to be more restrictive in production
+    methods: ["GET", "POST"]
+  }
+});
+
+// Middleware to attach io to every request
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
 
 // --- Core Middleware ---
 app.use(express.json()); // Body parser for JSON
@@ -76,7 +91,24 @@ app.use((err, req, res, next) => {
 
 const PORT = config.port || 5000;
 
-const server = app.listen(PORT, () => {
+// Socket.IO connection handler
+io.on('connection', (socket) => {
+  console.log('a user connected');
+
+  // Example: Listen for a custom event from a client
+  socket.on('vehicleLocationUpdate', (data) => {
+    console.log('Received location update:', data);
+    // Broadcast the update to other clients (e.g., a tracking dashboard)
+    socket.broadcast.emit('locationUpdate', data);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+});
+
+
+server.listen(PORT, () => {
   console.log(`Server running in ${config.nodeEnv} mode on port ${PORT}`);
 });
 

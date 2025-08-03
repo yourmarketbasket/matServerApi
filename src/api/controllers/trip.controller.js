@@ -20,6 +20,11 @@ class TripController {
     try {
       // const { vehicleId, routeId, driverId, class } = req.body;
       // const result = await TripService.registerTrip(vehicleId, routeId, driverId, class);
+
+      // Emit a real-time event to all connected clients
+      // For example, to update a live dashboard of trips
+      req.io.emit('newTripCreated', { trip: req.body });
+
       res.status(201).json({ success: true, data: { trip: req.body } });
     } catch (error) {
       next(error);
