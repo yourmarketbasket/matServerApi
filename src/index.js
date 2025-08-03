@@ -1,0 +1,87 @@
+const express = require('express');
+const helmet = require('helmet');
+const cors = require('cors');
+const morgan = require('morgan');
+const config = require('./config');
+const connectDB = require('./loaders/db');
+const { encryptionMiddleware } = require('./api/middlewares/encryption.middleware');
+
+// --- Import all routes ---
+const authRoutes = require('./api/routes/auth.routes');
+const superuserRoutes = require('./api/routes/superuser.routes');
+const saccoRoutes = require('./api/routes/sacco.routes');
+const routeRoutes = require('./api/routes/route.routes');
+const vehicleRoutes = require('./api/routes/vehicle.routes');
+const driverRoutes = require('./api/routes/driver.routes');
+const tripRoutes = require('./api/routes/trip.routes');
+const queueRoutes = require('./api/routes/queue.routes');
+const ticketRoutes = require('./api/routes/ticket.routes');
+const paymentRoutes = require('./api/routes/payment.routes');
+const payrollRoutes = require('./api/routes/payroll.routes');
+const reallocationRoutes = require('./api/routes/reallocation.routes');
+const supportRoutes = require('./api/routes/support.routes');
+const analyticsRoutes = require('./api/routes/analytics.routes');
+const discountRoutes = require('./api/routes/discount.routes');
+const loyaltyRoutes = require('./api/routes/loyalty.routes');
+
+// Connect to MongoDB
+connectDB();
+
+const app = express();
+
+// --- Core Middleware ---
+app.use(express.json()); // Body parser for JSON
+app.use(express.urlencoded({ extended: true }));
+app.use(helmet()); // Set security headers
+app.use(cors()); // Enable Cross-Origin Resource Sharing
+
+// Logging middleware
+if (config.nodeEnv === 'development') {
+  app.use(morgan('dev'));
+}
+
+// Custom Encryption Middleware (globally applied)
+// As per spec, all requests/responses are encrypted.
+// Note: This would need to be disabled for webhook endpoints like payment confirmation.
+app.use(encryptionMiddleware);
+
+// --- API Routes ---
+const apiPrefix = '/api/v1';
+app.use(`${apiPrefix}/auth`, authRoutes);
+app.use(`${apiPrefix}/superuser`, superuserRoutes);
+app.use(`${apiPrefix}/saccos`, saccoRoutes);
+app.use(`${apiPrefix}/routes`, routeRoutes);
+app.use(`${apiPrefix}/vehicles`, vehicleRoutes);
+app.use(`${apiPrefix}/drivers`, driverRoutes);
+app.use(`${apiPrefix}/trips`, tripRoutes);
+app.use(`${apiPrefix}/queues`, queueRoutes);
+app.use(`${apiPrefix}/tickets`, ticketRoutes);
+app.use(`${apiPrefix}/payments`, paymentRoutes);
+app.use(`${apiPrefix}/payroll`, payrollRoutes);
+app.use(`${apiPrefix}/reallocations`, reallocationRoutes);
+app.use(`${apiPrefix}/support`, supportRoutes);
+app.use(`${apiPrefix}/analytics`, analyticsRoutes);
+app.use(`${apiPrefix}/discounts`, discountRoutes);
+app.use(`${apiPrefix}/loyalty`, loyaltyRoutes);
+
+// --- Error Handling Middleware ---
+app.use((err, req, res, next) => {
+    console.error(err);
+    // In a real app, you would have more sophisticated error handling
+    res.status(err.statusCode || 500).json({
+        success: false,
+        error: err.message || 'Server Error'
+    });
+});
+
+const PORT = config.port || 5000;
+
+const server = app.listen(PORT, () => {
+  console.log(`Server running in ${config.nodeEnv} mode on port ${PORT}`);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err, promise) => {
+  console.error(`Unhandled Rejection: ${err.message}`);
+  server.close(() => process.exit(1));
+});
