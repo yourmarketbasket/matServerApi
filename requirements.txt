@@ -1,0 +1,22 @@
+# This file lists the main dependencies for the SafarEasy API server.
+# The standard way to install these in a Node.js project is by running `npm install`,
+# which uses the `package.json` file.
+
+bcryptjs==2.4.3
+cors==2.8.5
+crypto-js==4.1.1
+dotenv==16.0.3
+express==4.18.2
+express-rate-limit==6.7.0
+helmet==6.0.1
+jsonwebtoken==9.0.0
+mongoose==7.0.3
+morgan==1.10.0
+qrcode==1.5.1
+redis==4.6.5
+socket.io==4.6.1
+speakeasy==2.0.0
+
+# Development-only dependencies
+# These are typically installed via `npm install` and are listed in `package.json`
+# nodemon==2.0.22
