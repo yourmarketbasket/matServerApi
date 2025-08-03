@@ -1,0 +1,14 @@
+{
+  "name": "matserverapi",
+  "version": "1.0.0",
+  "description": "server for the mat ecosystem",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "keywords": [
+    "mat"
+  ],
+  "author": "musa",
+  "license": "MIT"
+}
