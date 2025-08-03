@@ -1,8 +1,7 @@
-// In a real implementation, you would import your models and utility functions
-// const User = require('../models/user.model');
-// const { generateToken } = require('../utils/jwt');
-// const { generateOtp, verifyOtp } = require('../utils/otp');
-// const { setupMfa, verifyMfa } = require('../utils/mfa');
+const User = require('../models/user.model');
+const { generateToken } = require('../utils/jwt.util');
+const { generateMfaSecret, verifyMfaToken } = require('../utils/mfa.util');
+const config = require('../../config');
 
 /**
  * @class AuthService
@@ -17,9 +16,40 @@ class AuthService {
    * @returns {Promise<{user: object, token: string}>}
    */
   async login(email, password, mfaCode) {
-    console.log('Attempting to log in:', { email, mfaCode: !!mfaCode });
-    // TODO: Find user by email, validate password, check MFA
-    return { user: { email, name: 'Test User' }, token: 'sample-jwt-token' };
+    // 1. Find user by email
+    const user = await User.findOne({ email }).select('+password');
+
+    if (!user) {
+      throw new Error('Invalid credentials');
+    }
+
+    // 2. Check if password matches
+    const isMatch = await user.matchPassword(password);
+
+    if (!isMatch) {
+      throw new Error('Invalid credentials');
+    }
+
+    // 3. Check MFA if enabled
+    if (user.mfaSecret) {
+      if (!mfaCode) {
+        // This is a special return case to signal the frontend to prompt for MFA
+        return { mfaRequired: true, userId: user._id };
+      }
+      const isMfaValid = verifyMfaToken(user.mfaSecret, mfaCode);
+      if (!isMfaValid) {
+        throw new Error('Invalid MFA code');
+      }
+    }
+
+    // 4. Generate JWT
+    const token = generateToken(user._id);
+
+    // Don't return password or mfaSecret
+    user.password = undefined;
+    user.mfaSecret = undefined;
+
+    return { user, token };
   }
 
   /**
@@ -28,9 +58,27 @@ class AuthService {
    * @returns {Promise<{user: object}>}
    */
   async signup(userData) {
-    console.log('Signing up new user:', userData);
-    // TODO: Create a new user instance and save to DB
-    return { user: userData };
+    const { name, email, phone, password, role } = userData;
+
+    // Check if user already exists
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      throw new Error('User with that email already exists.');
+    }
+
+    // Create user
+    const user = await User.create({
+      name,
+      email,
+      phone,
+      password,
+      role,
+    });
+
+    // Don't return the password
+    user.password = undefined;
+
+    return { user };
   }
 
   /**
@@ -40,30 +88,86 @@ class AuthService {
    * @returns {Promise<{user: object}>}
    */
   async registerSuperuser(userData, adminKey) {
-    console.log('Registering new superuser with admin key:', { email: userData.email, adminKey });
-    // TODO: Validate admin key, create superuser
-    return { user: { ...userData, role: 'superuser' } };
+    // 1. Validate the admin key
+    if (adminKey !== config.adminKey) {
+      throw new Error('Invalid admin key. Superuser registration failed.');
+    }
+
+    // 2. Check if a superuser already exists
+    const superuserExists = await User.findOne({ role: 'superuser' });
+    if (superuserExists) {
+      throw new Error('A superuser already exists. Cannot register another.');
+    }
+
+    const { name, email, phone, password } = userData;
+
+    // 3. Create the superuser
+    const superuser = await User.create({
+      name,
+      email,
+      phone,
+      password,
+      role: 'superuser',
+    });
+
+    // Don't return the password
+    superuser.password = undefined;
+
+    return { user: superuser };
   }
 
   /**
-   * @description Generates a password reset OTP
+   * @description Generates a password reset token
    * @param {string} email - The user's email
    * @returns {Promise<void>}
    */
-  async generateOTP(email) {
-    console.log(`Generating password reset OTP for ${email}`);
-    // TODO: Generate OTP and send it via email/SMS
+  async forgotPassword(email) {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      // We don't want to reveal if a user exists or not
+      return;
+    }
+
+    // Get reset token
+    const resetToken = user.getResetPasswordToken();
+
+    await user.save({ validateBeforeSave: false });
+
+    // Here you would typically send an email with the resetToken.
+    // For this example, we'll just log it.
+    console.log(`Password reset token for ${email}: ${resetToken}`);
   }
 
   /**
-   * @description Resets a user's password
-   * @param {string} otp - The OTP from the user
+   * @description Resets a user's password using a token
+   * @param {string} token - The reset token from the user
    * @param {string} newPassword - The new password
-   * @returns {Promise<void>}
+   * @returns {Promise<{success: boolean}>}
    */
-  async resetPassword(otp, newPassword) {
-    console.log('Resetting password with OTP:', otp);
-    // TODO: Verify OTP, find user, and update password
+  async resetPassword(token, newPassword) {
+    // Hash the token to match what's in the database
+    const resetPasswordToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken,
+      passwordResetExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      throw new Error('Invalid or expired token');
+    }
+
+    // Set new password
+    user.password = newPassword;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpire = undefined;
+    await user.save();
+
+    return { success: true };
   }
 
   /**
@@ -72,21 +176,39 @@ class AuthService {
    * @returns {Promise<{mfaSecret: string, qrCode: string}>}
    */
   async setupMFA(userId) {
-    console.log(`Setting up MFA for user ${userId}`);
-    // TODO: Generate MFA secret and QR code
-    return { mfaSecret: 'JBSWY3DPEHPK3PXP', qrCode: 'sample-qr-code-image-url' };
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const { secret, qrCodeDataUrl } = await generateMfaSecret(user.email);
+
+    user.mfaSecret = secret;
+    await user.save();
+
+    return { qrCodeDataUrl };
   }
 
   /**
-   * @description Verifies an MFA code
+   * @description Verifies an MFA code and enables MFA for the user
    * @param {string} userId - The user's ID
-   * @param {string} code - The MFA code from the user
+   * @param {string} token - The MFA code from the user
    * @returns {Promise<boolean>}
    */
-  async verifyMFA(userId, code) {
-    console.log(`Verifying MFA code for user ${userId}`);
-    // TODO: Verify the MFA code against the user's secret
-    return true;
+  async verifyMFA(userId, token) {
+    const user = await User.findById(userId);
+    if (!user || !user.mfaSecret) {
+      throw new Error('MFA not set up or user not found.');
+    }
+
+    const isVerified = verifyMfaToken(user.mfaSecret, token);
+
+    if (!isVerified) {
+      throw new Error('Invalid MFA token.');
+    }
+
+    // The mfa is now considered fully enabled and verified
+    return { success: true };
   }
 }
 

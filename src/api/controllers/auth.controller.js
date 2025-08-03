@@ -1,4 +1,4 @@
-// const AuthService = require('../services/auth.service');
+const AuthService = require('../services/auth.service');
 
 /**
  * @class AuthController
@@ -7,9 +7,9 @@
 class AuthController {
   async login(req, res, next) {
     try {
-      // const { email, password, mfaCode } = req.body;
-      // const result = await AuthService.login(email, password, mfaCode);
-      res.status(200).json({ success: true, data: { token: 'sample-token' } });
+      const { email, password, mfaCode } = req.body;
+      const result = await AuthService.login(email, password, mfaCode);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -17,8 +17,8 @@ class AuthController {
 
   async signup(req, res, next) {
     try {
-      // const result = await AuthService.signup(req.body);
-      res.status(201).json({ success: true, data: { user: req.body } });
+      const result = await AuthService.signup(req.body);
+      res.status(201).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -26,9 +26,9 @@ class AuthController {
 
   async registerSuperuser(req, res, next) {
     try {
-      // const { adminKey } = req.body;
-      // const result = await AuthService.registerSuperuser(req.body, adminKey);
-      res.status(201).json({ success: true, data: { user: req.body } });
+      const { adminKey, ...userData } = req.body;
+      const result = await AuthService.registerSuperuser(userData, adminKey);
+      res.status(201).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -36,9 +36,9 @@ class AuthController {
 
   async forgotPassword(req, res, next) {
     try {
-      // const { email } = req.body;
-      // await AuthService.generateOTP(email);
-      res.status(200).json({ success: true, message: 'Password reset link sent' });
+      const { email } = req.body;
+      await AuthService.forgotPassword(email);
+      res.status(200).json({ success: true, message: 'If a user with that email exists, a password reset token has been sent.' });
     } catch (error) {
       next(error);
     }
@@ -46,9 +46,9 @@ class AuthController {
 
   async resetPassword(req, res, next) {
     try {
-      // const { otp, newPassword } = req.body;
-      // await AuthService.resetPassword(otp, newPassword);
-      res.status(200).json({ success: true, message: 'Password reset successfully' });
+      const { token, newPassword } = req.body;
+      const result = await AuthService.resetPassword(token, newPassword);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -56,9 +56,9 @@ class AuthController {
 
   async setupMFA(req, res, next) {
     try {
-      // const { userId } = req.body;
-      // const result = await AuthService.setupMFA(userId);
-      res.status(200).json({ success: true, data: { mfaSecret: 'secret', qrCode: 'qr-url' } });
+      // The user ID should come from the authenticated user session (req.user)
+      const result = await AuthService.setupMFA(req.user._id);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -66,9 +66,9 @@ class AuthController {
 
   async verifyMFA(req, res, next) {
     try {
-      // const { userId, code } = req.body;
-      // const result = await AuthService.verifyMFA(userId, code);
-      res.status(200).json({ success: true, data: { success: true } });
+      const { token } = req.body;
+      const result = await AuthService.verifyMFA(req.user._id, token);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
