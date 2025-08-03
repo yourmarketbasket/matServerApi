@@ -1,11 +1,15 @@
 const CryptoJS = require('crypto-js');
 const config = require('../../config');
 
-const secretKey = config.encryptionKey;
+const rawKey = config.encryptionKey;
 
-if (!secretKey || secretKey.length !== 32) {
-  throw new Error('A 32-character ENCRYPTION_KEY must be provided in the environment variables.');
+if (!rawKey) {
+  throw new Error('An ENCRYPTION_KEY must be provided in the environment variables.');
 }
+
+// Derive a 32-byte key from the user's secret using SHA-256.
+// This allows the user to provide a key of any length.
+const secretKey = CryptoJS.SHA256(rawKey);
 
 /**
  * @description Encrypts a string using AES-256
@@ -14,7 +18,7 @@ if (!secretKey || secretKey.length !== 32) {
  */
 const encrypt = (text) => {
   const iv = CryptoJS.lib.WordArray.random(16);
-  const encrypted = CryptoJS.AES.encrypt(text, CryptoJS.enc.Utf8.parse(secretKey), {
+  const encrypted = CryptoJS.AES.encrypt(text, secretKey, {
     iv: iv,
     padding: CryptoJS.pad.Pkcs7,
     mode: CryptoJS.mode.CBC,
@@ -31,7 +35,7 @@ const decrypt = (encryptedText) => {
   const parts = encryptedText.split(':');
   const iv = CryptoJS.enc.Hex.parse(parts.shift());
   const encryptedData = parts.join(':');
-  const decrypted = CryptoJS.AES.decrypt(encryptedData, CryptoJS.enc.Utf8.parse(secretKey), {
+  const decrypted = CryptoJS.AES.decrypt(encryptedData, secretKey, {
     iv: iv,
     padding: CryptoJS.pad.Pkcs7,
     mode: CryptoJS.mode.CBC,
