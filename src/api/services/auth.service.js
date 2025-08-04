@@ -55,9 +55,10 @@ class AuthService {
   /**
    * @description Registers a new user
    * @param {object} userData - The user's data
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<{user: object}>}
    */
-  async signup(userData) {
+  async signup(userData, io) {
     const { name, email, phone, password, role } = userData;
 
     // Check if user already exists
@@ -78,6 +79,9 @@ class AuthService {
     // Don't return the password
     user.password = undefined;
 
+    // Emit a real-time event
+    io.emit('userRegistered', { user });
+
     return { user };
   }
 
@@ -85,9 +89,10 @@ class AuthService {
    * @description Registers a new superuser
    * @param {object} userData - The superuser's data
    * @param {string} adminKey - The secret admin key
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<{user: object}>}
    */
-  async registerSuperuser(userData, adminKey) {
+  async registerSuperuser(userData, adminKey, io) {
     // 1. Validate the admin key
     if (adminKey !== config.adminKey) {
       throw new Error('Invalid admin key. Superuser registration failed.');
@@ -112,6 +117,9 @@ class AuthService {
 
     // Don't return the password
     superuser.password = undefined;
+
+    // Emit a real-time event
+    io.emit('userRegistered', { user: superuser });
 
     return { user: superuser };
   }

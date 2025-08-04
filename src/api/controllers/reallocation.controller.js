@@ -1,4 +1,4 @@
-// const ReallocationService = require('../services/reallocation.service');
+const ReallocationService = require('../services/reallocation.service');
 
 /**
  * @class ReallocationController
@@ -7,10 +7,10 @@
 class ReallocationController {
   async autoReallocate(req, res, next) {
     try {
-      // const { tripId } = req.params;
-      // const { reason } = req.body;
-      // const result = await ReallocationService.autoReallocateTickets(tripId, reason);
-      res.status(200).json({ success: true, data: { reallocations: [] } });
+      const { tripId } = req.params;
+      const { reason } = req.body;
+      const result = await ReallocationService.autoReallocateTickets(tripId, reason, req.io);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -18,9 +18,9 @@ class ReallocationController {
 
   async manualReallocate(req, res, next) {
     try {
-      // const { ticketId, newTripId } = req.body;
-      // const result = await ReallocationService.manualReallocateTicket(ticketId, newTripId);
-      res.status(200).json({ success: true, data: { reallocation: req.body } });
+      const { ticketId, newTripId } = req.body;
+      const result = await ReallocationService.manualReallocateTicket(ticketId, newTripId, req.user._id, req.io);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }

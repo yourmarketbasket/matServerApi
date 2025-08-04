@@ -1,4 +1,4 @@
-// const SaccoService = require('../services/sacco.service');
+const SaccoService = require('../services/sacco.service');
 
 /**
  * @class SaccoController
@@ -7,9 +7,9 @@
 class SaccoController {
   async createSacco(req, res, next) {
     try {
-      // req.body.createdBy = req.user.id;
-      // const result = await SaccoService.createSacco(req.body);
-      res.status(201).json({ success: true, data: { sacco: req.body } });
+      req.body.createdBy = req.user.id;
+      const result = await SaccoService.createSacco(req.body, req.io);
+      res.status(201).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -17,8 +17,8 @@ class SaccoController {
 
   async getSaccos(req, res, next) {
     try {
-      // const result = await SaccoService.getSaccos();
-      res.status(200).json({ success: true, data: { saccos: [] } });
+      const result = await SaccoService.getSaccos();
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -26,9 +26,9 @@ class SaccoController {
 
   async updateSacco(req, res, next) {
     try {
-      // const { id } = req.params;
-      // const result = await SaccoService.updateSacco(id, req.body);
-      res.status(200).json({ success: true, data: { sacco: req.body } });
+      const { id } = req.params;
+      const result = await SaccoService.updateSacco(id, req.body);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -36,9 +36,9 @@ class SaccoController {
 
   async approveSacco(req, res, next) {
     try {
-      // const { id } = req.params;
-      // const result = await SaccoService.approveSacco(id);
-      res.status(200).json({ success: true, data: { sacco: { _id: req.params.id, status: 'approved' } } });
+      const { id } = req.params;
+      const result = await SaccoService.approveSacco(id, req.io);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -46,10 +46,10 @@ class SaccoController {
 
   async rejectSacco(req, res, next) {
     try {
-      // const { id } = req.params;
-      // const { reason } = req.body;
-      // const result = await SaccoService.rejectSacco(id, reason);
-      res.status(200).json({ success: true, data: { sacco: { _id: req.params.id, status: 'rejected' } } });
+      const { id } = req.params;
+      const { reason } = req.body;
+      const result = await SaccoService.rejectSacco(id, reason, req.io);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }

@@ -1,5 +1,5 @@
-// const Queue = require('../models/queue.model');
-// const Trip = require('../models/trip.model');
+const Queue = require('../models/queue.model');
+const Trip = require('../models/trip.model');
 
 /**
  * @class QueueService
@@ -12,31 +12,48 @@ class QueueService {
    * @returns {Promise<Array<object>>}
    */
   async getQueueByRoute(routeId) {
-    console.log(`Fetching queue for route ${routeId}`);
-    // TODO: Find all queue entries for the given routeId and sort by position
-    return { queues: [{ tripId: 'trip123', position: 1 }] };
+    const queues = await Queue.find({ routeId }).sort({ position: 1 });
+    return { queues };
   }
 
   /**
    * @description Adds a trip to the queue
    * @param {string} tripId - The ID of the trip to add
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async addTripToQueue(tripId) {
-    console.log(`Adding trip ${tripId} to the queue`);
-    // TODO: Determine the next position in the queue for the trip's route and class
-    // This is a complex operation that needs to be atomic.
-    return { queue: { tripId, position: 2, timestamp: new Date() } };
+  async addTripToQueue(tripId, io) {
+    const trip = await Trip.findById(tripId);
+    if (!trip) {
+      throw new Error('Trip not found');
+    }
+
+    // This is a simplified position assignment. A real implementation would be more robust.
+    const lastPosition = await Queue.findOne({ routeId: trip.routeId }).sort({ position: -1 });
+    const newPosition = lastPosition ? lastPosition.position + 1 : 1;
+
+    const queueEntry = await Queue.create({
+      tripId,
+      position: newPosition,
+      routeId: trip.routeId,
+      class: trip.class,
+    });
+
+    io.emit('queueUpdated', { routeId: trip.routeId });
+    return { queue: queueEntry };
   }
 
   /**
    * @description Removes a trip from the queue
    * @param {string} id - The ID of the queue entry to remove
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<void>}
    */
-  async removeTripFromQueue(id) {
-    console.log(`Removing queue entry ${id}`);
-    // TODO: Find queue entry by ID and remove it, then potentially re-order the queue.
+  async removeTripFromQueue(id, io) {
+    const queueEntry = await Queue.findByIdAndDelete(id);
+    if (queueEntry) {
+      io.emit('queueUpdated', { routeId: queueEntry.routeId });
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-// const RouteService = require('../services/route.service');
+const RouteService = require('../services/route.service');
 
 /**
  * @class RouteController
@@ -7,9 +7,9 @@
 class RouteController {
   async getRoutes(req, res, next) {
     try {
-      // const { saccoId, class } = req.query;
-      // const result = await RouteService.getRoutes(saccoId, class);
-      res.status(200).json({ success: true, data: { routes: [] } });
+      const { saccoId } = req.query;
+      const result = await RouteService.getRoutes(saccoId);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -17,9 +17,8 @@ class RouteController {
 
   async createRoute(req, res, next) {
     try {
-      // const { saccoId } = req.body; // Or from req.user if Sacco is logged in
-      // const result = await RouteService.createRoute(req.body, saccoId);
-      res.status(201).json({ success: true, data: { route: req.body } });
+      const result = await RouteService.createRoute(req.body, req.io);
+      res.status(201).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -27,9 +26,9 @@ class RouteController {
 
   async updateRoute(req, res, next) {
     try {
-      // const { id } = req.params;
-      // const result = await RouteService.updateRoute(id, req.body);
-      res.status(200).json({ success: true, data: { route: req.body } });
+      const { id } = req.params;
+      const result = await RouteService.updateRoute(id, req.body, req.io);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -37,9 +36,9 @@ class RouteController {
 
   async finalizeRoute(req, res, next) {
     try {
-      // const { id } = req.params;
-      // const result = await RouteService.finalizeRoute(id);
-      res.status(200).json({ success: true, data: { route: { _id: req.params.id, status: 'finalized' } } });
+      const { id } = req.params;
+      const result = await RouteService.finalizeRoute(id, req.io);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -47,8 +46,8 @@ class RouteController {
 
   async deleteRoute(req, res, next) {
     try {
-      // const { id } = req.params;
-      // await RouteService.deleteRoute(id);
+      const { id } = req.params;
+      await RouteService.deleteRoute(id);
       res.status(200).json({ success: true, message: 'Route deleted successfully' });
     } catch (error) {
       next(error);
@@ -57,10 +56,9 @@ class RouteController {
 
   async addFareAdjustment(req, res, next) {
     try {
-      // const { id } = req.params;
-      // const { factor, multiplier, class } = req.body;
-      // const result = await RouteService.adjustFare(id, factor, multiplier, class);
-      res.status(200).json({ success: true, data: { adjustment: req.body } });
+      const { id } = req.params;
+      const result = await RouteService.adjustFare(id, req.body, req.io);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }

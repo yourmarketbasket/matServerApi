@@ -1,4 +1,4 @@
-// const QueueService = require('../services/queue.service');
+const QueueService = require('../services/queue.service');
 
 /**
  * @class QueueController
@@ -7,10 +7,9 @@
 class QueueController {
   async getQueues(req, res, next) {
     try {
-      // const { routeId } = req.params;
-      // const { class } = req.query;
-      // const result = await QueueService.getQueueByRoute(routeId, class);
-      res.status(200).json({ success: true, data: { queues: [] } });
+      const { routeId } = req.params;
+      const result = await QueueService.getQueueByRoute(routeId);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -18,9 +17,9 @@ class QueueController {
 
   async createQueue(req, res, next) {
     try {
-      // const { tripId } = req.body;
-      // const result = await QueueService.addTripToQueue(tripId);
-      res.status(201).json({ success: true, data: { queue: { tripId: req.body.tripId } } });
+      const { tripId } = req.body;
+      const result = await QueueService.addTripToQueue(tripId, req.io);
+      res.status(201).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -28,8 +27,8 @@ class QueueController {
 
   async deleteQueue(req, res, next) {
     try {
-      // const { id } = req.params;
-      // await QueueService.removeTripFromQueue(id);
+      const { id } = req.params;
+      await QueueService.removeTripFromQueue(id, req.io);
       res.status(200).json({ success: true, message: 'Queue entry deleted successfully' });
     } catch (error) {
       next(error);

@@ -1,4 +1,4 @@
-// const Vehicle = require('../models/vehicle.model');
+const Vehicle = require('../models/vehicle.model');
 
 /**
  * @class VehicleService
@@ -11,34 +11,33 @@ class VehicleService {
    * @returns {Promise<Array<object>>}
    */
   async getVehiclesBySacco(saccoId) {
-    console.log(`Fetching vehicles for Sacco ${saccoId}`);
-    // TODO: Find all vehicles with the matching saccoId
-    return { vehicles: [{ licensePlate: 'KDA 123X', class: 'economy' }] };
+    const vehicles = await Vehicle.find({ saccoId });
+    return { vehicles };
   }
 
   /**
    * @description Creates a new vehicle
    * @param {object} vehicleData - The data for the new vehicle
-   * @param {string} saccoId - The ID of the Sacco this vehicle belongs to
-   * @param {string} className - The class of the vehicle
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async createVehicle(vehicleData, saccoId, className) {
-    console.log(`Creating vehicle for Sacco ${saccoId}:`, { ...vehicleData, class: className });
-    // TODO: Create a new vehicle instance and save it
-    return { vehicle: { ...vehicleData, saccoId, class: className } };
+  async createVehicle(vehicleData, io) {
+    const vehicle = await Vehicle.create(vehicleData);
+    io.emit('vehicleCreated', { vehicle });
+    return { vehicle };
   }
 
   /**
    * @description Updates a vehicle's details
    * @param {string} id - The ID of the vehicle to update
    * @param {object} vehicleData - The updated data
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async updateVehicle(id, vehicleData) {
-    console.log(`Updating vehicle ${id}:`, vehicleData);
-    // TODO: Find vehicle by ID and update its details
-    return { vehicle: { _id: id, ...vehicleData } };
+  async updateVehicle(id, vehicleData, io) {
+    const vehicle = await Vehicle.findByIdAndUpdate(id, vehicleData, { new: true });
+    io.emit('vehicleUpdated', { vehicle });
+    return { vehicle };
   }
 
   /**
@@ -47,8 +46,7 @@ class VehicleService {
    * @returns {Promise<void>}
    */
   async deleteVehicle(id) {
-    console.log(`Deleting vehicle ${id}`);
-    // TODO: Find vehicle by ID and remove it
+    await Vehicle.findByIdAndDelete(id);
   }
 }
 

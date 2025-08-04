@@ -1,7 +1,5 @@
-// const Reallocation = require('../models/reallocation.model');
-// const Ticket = require('../models/ticket.model');
-// const Trip = require('../models/trip.model');
-// const QueueService = require('./queue.service');
+const Reallocation = require('../models/reallocation.model');
+const Ticket = require('../models/ticket.model');
 
 /**
  * @class ReallocationService
@@ -12,29 +10,45 @@ class ReallocationService {
    * @description Automatically reallocates all tickets from a canceled trip
    * @param {string} tripId - The ID of the canceled trip
    * @param {string} reason - The reason for cancellation
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<Array<object>>}
    */
-  async autoReallocateTickets(tripId, reason) {
+  async autoReallocateTickets(tripId, reason, io) {
+    // This is a placeholder for a very complex operation.
     console.log(`Auto-reallocating tickets for canceled trip ${tripId} due to: ${reason}`);
-    // TODO: A complex transaction:
-    // 1. Find all tickets for the trip.
-    // 2. For each ticket, find a suitable alternative trip from the queue.
-    // 3. Update the ticket to the new tripId.
-    // 4. Create a Reallocation record.
-    // 5. Notify the passenger.
-    return { reallocations: [{ ticketId: 'ticket123', newTripId: 'trip789' }] };
+    io.emit('ticketsReallocated', { originalTripId: tripId, reason });
+    return { reallocations: [] };
   }
 
   /**
    * @description Manually reallocates a single ticket to a new trip
    * @param {string} ticketId - The ID of the ticket to reallocate
    * @param {string} newTripId - The ID of the new trip
+   * @param {string} reallocatedBy - The ID of the user performing the reallocation
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async manualReallocateTicket(ticketId, newTripId) {
-    console.log(`Manually reallocating ticket ${ticketId} to new trip ${newTripId}`);
-    // TODO: Update the ticket, create a Reallocation record, and notify the passenger.
-    return { reallocation: { ticketId, newTripId, reason: 'Manual reallocation by support staff' } };
+  async manualReallocateTicket(ticketId, newTripId, reallocatedBy, io) {
+    const ticket = await Ticket.findById(ticketId);
+    if (!ticket) {
+        throw new Error('Ticket not found');
+    }
+    const originalTripId = ticket.tripId;
+
+    ticket.tripId = newTripId;
+    await ticket.save();
+
+    const reallocation = await Reallocation.create({
+      ticketId,
+      originalTripId,
+      newTripId,
+      reason: 'Manual reallocation by support staff',
+      reallocatedBy
+    });
+
+    io.emit('ticketReallocated', { ticketId, newTripId });
+
+    return { reallocation };
   }
 }
 

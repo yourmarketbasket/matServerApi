@@ -2,7 +2,7 @@
 // For this service, we will assume the 'Dispute' model can be used for inquiries,
 // or that specific models would be created later.
 
-// const Dispute = require('../models/dispute.model');
+const Dispute = require('../models/dispute.model');
 
 /**
  * @class SupportService
@@ -11,38 +11,42 @@
 class SupportService {
   /**
    * @description Creates a new support inquiry
-   * @param {string} ticketId - The ID of the related ticket
-   * @param {string} description - The description of the inquiry
+   * @param {object} inquiryData - The data for the new inquiry
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async createInquiry(ticketId, description) {
-    console.log(`Creating inquiry for ticket ${ticketId}: "${description}"`);
-    // TODO: Create a new Dispute/Inquiry record
-    return { inquiry: { ticketId, description, status: 'open' } };
+  async createInquiry(inquiryData, io) {
+    const inquiry = await Dispute.create(inquiryData);
+    // Notify support staff room
+    io.to('support_staff').emit('newInquiry', { inquiry });
+    return { inquiry };
   }
 
   /**
    * @description Resolves an existing inquiry
    * @param {string} id - The ID of the inquiry to resolve
    * @param {string} resolution - The details of the resolution
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async resolveInquiry(id, resolution) {
-    console.log(`Resolving inquiry ${id} with resolution: "${resolution}"`);
-    // TODO: Find the inquiry by ID and update its status and resolution details
-    return { inquiry: { _id: id, status: 'resolved', resolution } };
+  async resolveInquiry(id, resolution, io) {
+    const inquiry = await Dispute.findByIdAndUpdate(id, { status: 'resolved', resolutionDetails: resolution }, { new: true });
+    io.to('support_staff').emit('inquiryResolved', { inquiry });
+    return { inquiry };
   }
 
   /**
    * @description Escalates an inquiry to a higher level
    * @param {string} id - The ID of the inquiry to escalate
    * @param {string} details - The details for the escalation
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async escalateInquiry(id, details) {
-    console.log(`Escalating inquiry ${id} with details: "${details}"`);
-    // TODO: Find the inquiry, update its status to 'escalated', and notify admins
-    return { escalation: { inquiryId: id, details, status: 'escalated' } };
+  async escalateInquiry(id, details, io) {
+    const inquiry = await Dispute.findByIdAndUpdate(id, { status: 'escalated' }, { new: true });
+    // Notify admin room
+    io.to('admins').emit('inquiryEscalated', { inquiry, details });
+    return { inquiry };
   }
 
   /**

@@ -1,4 +1,4 @@
-// const PaymentService = require('../services/payment.service');
+const PaymentService = require('../services/payment.service');
 
 /**
  * @class PaymentController
@@ -7,9 +7,8 @@
 class PaymentController {
   async createPayment(req, res, next) {
     try {
-      // const { ticketId, amount, method, systemFee } = req.body;
-      // const result = await PaymentService.initiatePayment({ ticketId, amount, method }, systemFee);
-      res.status(201).json({ success: true, data: { payment: req.body } });
+      const result = await PaymentService.initiatePayment(req.body);
+      res.status(201).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -17,11 +16,10 @@ class PaymentController {
 
   async confirmPayment(req, res, next) {
     try {
-      // This would typically be hit by a webhook from a payment provider
-      // const { id } = req.params;
-      // const { status } = req.body;
-      // const result = await PaymentService.confirmPayment(id, status);
-      res.status(200).json({ success: true, data: { payment: { _id: req.params.id, status: req.body.status } } });
+      const { id } = req.params;
+      const { status } = req.body;
+      const result = await PaymentService.confirmPayment(id, status, req.io);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -29,9 +27,9 @@ class PaymentController {
 
   async getSaccoPayments(req, res, next) {
     try {
-      // const { saccoId } = req.params;
-      // const result = await PaymentService.getPaymentsBySacco(saccoId);
-      res.status(200).json({ success: true, data: { payments: [] } });
+      const { saccoId } = req.params;
+      const result = await PaymentService.getPaymentsBySacco(saccoId);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -39,9 +37,9 @@ class PaymentController {
 
   async getOwnerPayments(req, res, next) {
     try {
-      // const { id } = req.params; // ownerId
-      // const result = await PaymentService.getPaymentsByOwner(id);
-      res.status(200).json({ success: true, data: { payments: [] } });
+      const { id } = req.params; // ownerId
+      const result = await PaymentService.getPaymentsByOwner(id);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }

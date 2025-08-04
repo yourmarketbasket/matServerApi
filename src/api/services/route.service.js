@@ -1,5 +1,5 @@
-// const Route = require('../models/route.model');
-// const FareAdjustment = require('../models/fareAdjustment.model');
+const Route = require('../models/route.model');
+const FareAdjustment = require('../models/fareAdjustment.model');
 
 /**
  * @class RouteService
@@ -12,44 +12,49 @@ class RouteService {
    * @returns {Promise<Array<object>>}
    */
   async getRoutes(saccoId) {
-    console.log(`Fetching routes for Sacco: ${saccoId || 'all'}`);
-    // TODO: Find routes, filtering by saccoId if provided
-    return { routes: [{ name: 'Nairobi-Mombasa', baseFare: 1500 }] };
+    let query = {};
+    if (saccoId) {
+      query.saccoId = saccoId;
+    }
+    const routes = await Route.find(query);
+    return { routes };
   }
 
   /**
    * @description Creates a new route
    * @param {object} routeData - The data for the new route
-   * @param {string} saccoId - The ID of the Sacco creating the route
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async createRoute(routeData, saccoId) {
-    console.log(`Creating route for Sacco ${saccoId}:`, routeData);
-    // TODO: Create a new route instance and save it
-    return { route: { ...routeData, saccoId, status: 'draft' } };
+  async createRoute(routeData, io) {
+    const route = await Route.create(routeData);
+    io.emit('routeCreated', { route });
+    return { route };
   }
 
   /**
    * @description Updates an existing route
    * @param {string} id - The ID of the route to update
    * @param {object} routeData - The updated data
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async updateRoute(id, routeData) {
-    console.log(`Updating route ${id}:`, routeData);
-    // TODO: Find route by ID and update its details
-    return { route: { _id: id, ...routeData } };
+  async updateRoute(id, routeData, io) {
+    const route = await Route.findByIdAndUpdate(id, routeData, { new: true });
+    io.emit('routeUpdated', { route });
+    return { route };
   }
 
   /**
    * @description Finalizes a draft route
    * @param {string} id - The ID of the route to finalize
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async finalizeRoute(id) {
-    console.log(`Finalizing route ${id}`);
-    // TODO: Find route by ID and set status to 'finalized'
-    return { route: { _id: id, status: 'finalized' } };
+  async finalizeRoute(id, io) {
+    const route = await Route.findByIdAndUpdate(id, { status: 'finalized' }, { new: true });
+    io.emit('routeUpdated', { route });
+    return { route };
   }
 
   /**
@@ -58,22 +63,22 @@ class RouteService {
    * @returns {Promise<void>}
    */
   async deleteRoute(id) {
-    console.log(`Deleting route ${id}`);
-    // TODO: Find route by ID and remove it
+    await Route.findByIdAndDelete(id);
   }
 
   /**
    * @description Adjusts the fare for a specific route
    * @param {string} routeId - The ID of the route
-   * @param {string} factor - The reason for adjustment
-   * @param {number} multiplier - The fare multiplier
-   * @param {string} className - The class the adjustment applies to
+   * @param {object} adjustmentData - The fare adjustment data
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async adjustFare(routeId, factor, multiplier, className) {
-    console.log('Adjusting fare:', { routeId, factor, multiplier, class: className });
-    // TODO: Create a new FareAdjustment document and link it to the route
-    return { adjustment: { routeId, factor, multiplier, class: className } };
+  async adjustFare(routeId, adjustmentData, io) {
+    const adjustment = await FareAdjustment.create({ ...adjustmentData, routeId });
+    // Also update the route to link the adjustment
+    await Route.findByIdAndUpdate(routeId, { $push: { fareAdjustments: adjustment._id } });
+    io.emit('fareAdjusted', { routeId, adjustment });
+    return { adjustment };
   }
 }
 

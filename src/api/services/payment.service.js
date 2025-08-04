@@ -1,5 +1,5 @@
-// const Payment = require('../models/payment.model');
-// const Ticket = require('../models/ticket.model');
+const Payment = require('../models/payment.model');
+const Ticket = require('../models/ticket.model');
 
 /**
  * @class PaymentService
@@ -9,26 +9,32 @@ class PaymentService {
   /**
    * @description Initiates a payment for a ticket
    * @param {object} paymentData - The payment details
-   * @param {number} systemFee - The calculated system fee
    * @returns {Promise<object>}
    */
-  async initiatePayment(paymentData, systemFee) {
-    console.log('Initiating payment:', { ...paymentData, systemFee });
-    // TODO: Integrate with payment gateway (e.g., M-Pesa API)
-    // Create a payment record with 'pending' status
-    return { payment: { ...paymentData, systemFee, status: 'pending' } };
+  async initiatePayment(paymentData) {
+    // In a real app, this would call a payment gateway API and return a checkout URL or similar.
+    // For now, we'll just create the payment record.
+    const payment = await Payment.create(paymentData);
+    return { payment };
   }
 
   /**
    * @description Confirms a payment after gateway callback
    * @param {string} id - The ID of the payment to confirm
    * @param {string} status - The new status ('completed' or 'failed')
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async confirmPayment(id, status) {
-    console.log(`Confirming payment ${id} with status: ${status}`);
-    // TODO: Find payment by ID, update its status, and update the corresponding ticket status
-    return { payment: { _id: id, status } };
+  async confirmPayment(id, status, io) {
+    const payment = await Payment.findByIdAndUpdate(id, { status }, { new: true });
+    if (status === 'completed') {
+      // If payment is successful, update the ticket status to 'paid'
+      await Ticket.findByIdAndUpdate(payment.ticketId, { status: 'paid', paymentId: payment._id });
+      io.emit('paymentConfirmed', { payment });
+    } else {
+      io.emit('paymentFailed', { payment });
+    }
+    return { payment };
   }
 
   /**

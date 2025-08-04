@@ -17,7 +17,7 @@ class AuthController {
 
   async signup(req, res, next) {
     try {
-      const result = await AuthService.signup(req.body);
+      const result = await AuthService.signup(req.body, req.io);
       res.status(201).json({ success: true, data: result });
     } catch (error) {
       next(error);
@@ -27,7 +27,7 @@ class AuthController {
   async registerSuperuser(req, res, next) {
     try {
       const { adminKey, ...userData } = req.body;
-      const result = await AuthService.registerSuperuser(userData, adminKey);
+      const result = await AuthService.registerSuperuser(userData, adminKey, req.io);
       res.status(201).json({ success: true, data: result });
     } catch (error) {
       next(error);

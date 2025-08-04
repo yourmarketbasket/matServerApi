@@ -1,4 +1,4 @@
-// const Sacco = require('../models/sacco.model');
+const Sacco = require('../models/sacco.model');
 
 /**
  * @class SaccoService
@@ -8,12 +8,13 @@ class SaccoService {
   /**
    * @description Creates a new Sacco
    * @param {object} saccoData - The data for the new Sacco
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async createSacco(saccoData) {
-    console.log('Creating new Sacco:', saccoData);
-    // TODO: Create a new Sacco instance and save it
-    return { sacco: { ...saccoData, status: 'pending' } };
+  async createSacco(saccoData, io) {
+    const sacco = await Sacco.create(saccoData);
+    io.emit('saccoCreated', { sacco });
+    return { sacco };
   }
 
   /**
@@ -23,32 +24,34 @@ class SaccoService {
    * @returns {Promise<object>}
    */
   async updateSacco(id, saccoData) {
-    console.log(`Updating Sacco ${id}:`, saccoData);
-    // TODO: Find Sacco by ID and update its details
-    return { sacco: { _id: id, ...saccoData } };
+    const sacco = await Sacco.findByIdAndUpdate(id, saccoData, { new: true });
+    return { sacco };
   }
 
   /**
    * @description Approves a pending Sacco
    * @param {string} id - The ID of the Sacco to approve
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async approveSacco(id) {
-    console.log(`Approving Sacco ${id}`);
-    // TODO: Find Sacco by ID and set status to 'approved'
-    return { sacco: { _id: id, status: 'approved' } };
+  async approveSacco(id, io) {
+    const sacco = await Sacco.findByIdAndUpdate(id, { status: 'approved' }, { new: true });
+    io.emit('saccoStatusChanged', { saccoId: id, status: 'approved' });
+    return { sacco };
   }
 
   /**
    * @description Rejects a pending Sacco
    * @param {string} id - The ID of the Sacco to reject
    * @param {string} reason - The reason for rejection
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async rejectSacco(id, reason) {
-    console.log(`Rejecting Sacco ${id} for reason: ${reason}`);
-    // TODO: Find Sacco by ID, set status to 'rejected', and possibly log the reason
-    return { sacco: { _id: id, status: 'rejected' } };
+  async rejectSacco(id, reason, io) {
+    const sacco = await Sacco.findByIdAndUpdate(id, { status: 'rejected' }, { new: true });
+    // In a real app, you might want to log the reason
+    io.emit('saccoStatusChanged', { saccoId: id, status: 'rejected', reason });
+    return { sacco };
   }
 
   /**

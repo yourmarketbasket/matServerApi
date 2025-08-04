@@ -1,4 +1,4 @@
-// const Trip = require('../models/trip.model');
+const Trip = require('../models/trip.model');
 
 /**
  * @class TripService
@@ -7,16 +7,14 @@
 class TripService {
   /**
    * @description Registers a new trip
-   * @param {string} vehicleId - The ID of the vehicle for the trip
-   * @param {string} routeId - The ID of the route
-   * @param {string} driverId - The ID of the driver
-   * @param {string} className - The class of the trip
+   * @param {object} tripData - The data for the new trip
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async registerTrip(vehicleId, routeId, driverId, className) {
-    console.log('Registering new trip:', { vehicleId, routeId, driverId, class: className });
-    // TODO: Create a new trip instance and save it
-    return { trip: { vehicleId, routeId, driverId, class: className, status: 'pending' } };
+  async registerTrip(tripData, io) {
+    const trip = await Trip.create(tripData);
+    io.emit('tripRegistered', { trip });
+    return { trip };
   }
 
   /**
@@ -25,31 +23,34 @@ class TripService {
    * @returns {Promise<Array<object>>}
    */
   async getTripsByRoute(routeId) {
-    console.log(`Fetching trips for route ${routeId}`);
-    // TODO: Find all trips with the matching routeId
-    return { trips: [{ _id: 'trip123', status: 'active' }] };
+    const trips = await Trip.find({ routeId });
+    return { trips };
   }
 
   /**
    * @description Cancels a trip
    * @param {string} id - The ID of the trip to cancel
    * @param {string} reason - The reason for cancellation
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<void>}
    */
-  async cancelTrip(id, reason) {
-    console.log(`Canceling trip ${id} for reason: ${reason}`);
-    // TODO: Find trip by ID, set status to 'canceled', and handle reallocations
+  async cancelTrip(id, reason, io) {
+    const trip = await Trip.findByIdAndUpdate(id, { status: 'canceled' }, { new: true });
+    io.emit('tripStatusChanged', { tripId: id, status: 'canceled', reason });
+    // Here you would also trigger the ticket reallocation service
   }
 
   /**
    * @description Marks a trip as completed
    * @param {string} id - The ID of the trip to complete
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async completeTrip(id) {
-    console.log(`Completing trip ${id}`);
-    // TODO: Find trip by ID, set status to 'completed', and trigger payroll processing
-    return { trip: { _id: id, status: 'completed' } };
+  async completeTrip(id, io) {
+    const trip = await Trip.findByIdAndUpdate(id, { status: 'completed', completionTimestamp: new Date() }, { new: true });
+    io.emit('tripStatusChanged', { tripId: id, status: 'completed' });
+    // Here you would trigger the payroll service
+    return { trip };
   }
 }
 

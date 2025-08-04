@@ -1,4 +1,4 @@
-// const SupportService = require('../services/support.service');
+const SupportService = require('../services/support.service');
 
 /**
  * @class SupportController
@@ -7,9 +7,9 @@
 class SupportController {
   async createInquiry(req, res, next) {
     try {
-      // const { ticketId, description } = req.body;
-      // const result = await SupportService.createInquiry(ticketId, description);
-      res.status(201).json({ success: true, data: { inquiry: req.body } });
+      req.body.raisedBy = req.user._id;
+      const result = await SupportService.createInquiry(req.body, req.io);
+      res.status(201).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -17,8 +17,8 @@ class SupportController {
 
   async getInquiries(req, res, next) {
     try {
-      // const result = await SupportService.getInquiries();
-      res.status(200).json({ success: true, data: { inquiries: [] } });
+      const result = await SupportService.getInquiries();
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -26,10 +26,10 @@ class SupportController {
 
   async updateInquiry(req, res, next) {
     try {
-      // const { id } = req.params;
-      // const { resolution } = req.body;
-      // const result = await SupportService.resolveInquiry(id, resolution);
-      res.status(200).json({ success: true, data: { inquiry: { _id: req.params.id } } });
+      const { id } = req.params;
+      const { resolution } = req.body;
+      const result = await SupportService.resolveInquiry(id, resolution, req.io);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -37,9 +37,9 @@ class SupportController {
 
   async createEscalation(req, res, next) {
     try {
-      // const { inquiryId, details } = req.body;
-      // const result = await SupportService.escalateInquiry(inquiryId, details);
-      res.status(201).json({ success: true, data: { escalation: req.body } });
+      const { inquiryId, details } = req.body;
+      const result = await SupportService.escalateInquiry(inquiryId, details, req.io);
+      res.status(201).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
