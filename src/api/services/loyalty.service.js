@@ -1,4 +1,4 @@
-// const Loyalty = require('../models/loyalty.model');
+const Loyalty = require('../models/loyalty.model');
 
 /**
  * @class LoyaltyService
@@ -10,12 +10,17 @@ class LoyaltyService {
    * @param {string} userId
    * @param {string} ticketId
    * @param {number} points
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async earnPoints(userId, ticketId, points) {
-    console.log(`User ${userId} earned ${points} points from ticket ${ticketId}`);
-    // TODO: Find loyalty account for userId (or create one), add points, and add a transaction record.
-    return { loyalty: { userId, points: 500 + points } }; // Assuming user had 500 points
+  async earnPoints(userId, ticketId, points, io) {
+    const loyalty = await Loyalty.findOneAndUpdate(
+      { userId },
+      { $inc: { points }, $push: { transactions: { type: 'earned', points, ticketId } } },
+      { new: true, upsert: true }
+    );
+    io.to(userId).emit('loyaltyUpdated', { loyalty });
+    return { loyalty };
   }
 
   /**
@@ -23,12 +28,22 @@ class LoyaltyService {
    * @param {string} userId
    * @param {string} ticketId
    * @param {number} points
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async redeemPoints(userId, ticketId, points) {
-    console.log(`User ${userId} redeemed ${points} points for ticket ${ticketId}`);
-    // TODO: Find loyalty account, ensure sufficient balance, subtract points, and add a transaction record.
-    return { loyalty: { userId, points: 500 - points } }; // Assuming user had 500 points
+  async redeemPoints(userId, ticketId, points, io) {
+    const loyalty = await Loyalty.findOneAndUpdate(
+      { userId, points: { $gte: points } }, // Ensure user has enough points
+      { $inc: { points: -points }, $push: { transactions: { type: 'redeemed', points, ticketId } } },
+      { new: true }
+    );
+
+    if (!loyalty) {
+      throw new Error('Insufficient points or user not found.');
+    }
+
+    io.to(userId).emit('loyaltyUpdated', { loyalty });
+    return { loyalty };
   }
 
   /**
@@ -37,9 +52,8 @@ class LoyaltyService {
    * @returns {Promise<object>}
    */
   async getLoyalty(userId) {
-    console.log(`Fetching loyalty account for user ${userId}`);
-    // TODO: Find loyalty account by userId
-    return { loyalty: { userId, points: 500, transactions: [] } };
+    const loyalty = await Loyalty.findOne({ userId });
+    return { loyalty };
   }
 }
 

@@ -1,4 +1,4 @@
-// const Discount = require('../models/discount.model');
+const Discount = require('../models/discount.model');
 
 /**
  * @class DiscountService
@@ -8,34 +8,39 @@ class DiscountService {
   /**
    * @description Creates a new discount
    * @param {object} discountData - The data for the new discount
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async createDiscount(discountData) {
-    console.log('Creating new discount:', discountData);
-    // TODO: Create a new discount instance and save it
-    return { discount: { ...discountData, isActive: true } };
+  async createDiscount(discountData, io) {
+    const discount = await Discount.create(discountData);
+    io.to(discount.saccoId.toString()).emit('discountCreated', { discount });
+    return { discount };
   }
 
   /**
    * @description Updates an existing discount
    * @param {string} id - The ID of the discount to update
    * @param {object} discountData - The updated data
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async updateDiscount(id, discountData) {
-    console.log(`Updating discount ${id}:`, discountData);
-    // TODO: Find discount by ID and update its details
-    return { discount: { _id: id, ...discountData } };
+  async updateDiscount(id, discountData, io) {
+    const discount = await Discount.findByIdAndUpdate(id, discountData, { new: true });
+    io.to(discount.saccoId.toString()).emit('discountUpdated', { discount });
+    return { discount };
   }
 
   /**
    * @description Deletes a discount
    * @param {string} id - The ID of the discount to delete
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<void>}
    */
-  async deleteDiscount(id) {
-    console.log(`Deleting discount ${id}`);
-    // TODO: Find discount by ID and remove it (or set it to inactive)
+  async deleteDiscount(id, io) {
+    const discount = await Discount.findByIdAndDelete(id);
+    if (discount) {
+      io.to(discount.saccoId.toString()).emit('discountDeleted', { discountId: id });
+    }
   }
 
   /**
@@ -44,9 +49,8 @@ class DiscountService {
    * @returns {Promise<Array<object>>}
    */
   async getDiscounts(saccoId) {
-    console.log(`Fetching discounts for Sacco ${saccoId}`);
-    // TODO: Find all discounts with the matching saccoId
-    return { discounts: [{ code: 'SAVE10', type: 'percentage', value: 10 }] };
+    const discounts = await Discount.find({ saccoId });
+    return { discounts };
   }
 }
 

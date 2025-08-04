@@ -1,5 +1,4 @@
-// const Driver = require('../models/driver.model');
-// const User = require('../models/user.model');
+const Driver = require('../models/driver.model');
 
 /**
  * @class DriverService
@@ -9,25 +8,26 @@ class DriverService {
   /**
    * @description Creates a new driver profile
    * @param {object} driverData - The data for the new driver
-   * @param {string} saccoId - The ID of the Sacco the driver belongs to
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async createDriver(driverData, saccoId) {
-    console.log(`Creating driver for Sacco ${saccoId}:`, driverData);
-    // TODO: Create a new driver instance and link it to a user
-    return { driver: { ...driverData, saccoId } };
+  async createDriver(driverData, io) {
+    const driver = await Driver.create(driverData);
+    io.emit('driverCreated', { driver });
+    return { driver };
   }
 
   /**
    * @description Assigns a driver to a specific vehicle
    * @param {string} driverId - The ID of the driver
    * @param {string} vehicleId - The ID of the vehicle
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async assignDriverToVehicle(driverId, vehicleId) {
-    console.log(`Assigning driver ${driverId} to vehicle ${vehicleId}`);
-    // TODO: Find driver by ID and update their vehicleId
-    return { driver: { _id: driverId, vehicleId } };
+  async assignDriverToVehicle(driverId, vehicleId, io) {
+    const driver = await Driver.findByIdAndUpdate(driverId, { vehicleId }, { new: true });
+    io.emit('driverUpdated', { driver });
+    return { driver };
   }
 
   /**
@@ -36,21 +36,21 @@ class DriverService {
    * @returns {Promise<Array<object>>}
    */
   async getDriversBySacco(saccoId) {
-    console.log(`Fetching drivers for Sacco ${saccoId}`);
-    // TODO: Find all drivers with the matching saccoId
-    return { drivers: [{ name: 'John Doe', licenseNumber: 'DL12345' }] };
+    const drivers = await Driver.find({ saccoId });
+    return { drivers };
   }
 
   /**
    * @description Updates a driver's details
    * @param {string} id - The ID of the driver to update
    * @param {object} driverData - The updated data
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async updateDriver(id, driverData) {
-    console.log(`Updating driver ${id}:`, driverData);
-    // TODO: Find driver by ID and update their details
-    return { driver: { _id: id, ...driverData } };
+  async updateDriver(id, driverData, io) {
+    const driver = await Driver.findByIdAndUpdate(id, driverData, { new: true });
+    io.emit('driverUpdated', { driver });
+    return { driver };
   }
 
   /**

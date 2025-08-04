@@ -67,7 +67,7 @@ class AuthController {
   async verifyMFA(req, res, next) {
     try {
       const { token } = req.body;
-      const result = await AuthService.verifyMFA(req.user._id, token);
+      const result = await AuthService.verifyMFA(req.user._id, token, req.io);
       res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);

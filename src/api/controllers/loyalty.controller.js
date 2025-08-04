@@ -1,4 +1,4 @@
-// const LoyaltyService = require('../services/loyalty.service');
+const LoyaltyService = require('../services/loyalty.service');
 
 /**
  * @class LoyaltyController
@@ -7,9 +7,9 @@
 class LoyaltyController {
   async earnPoints(req, res, next) {
     try {
-      // const { userId, ticketId, points } = req.body;
-      // const result = await LoyaltyService.earnPoints(userId, ticketId, points);
-      res.status(200).json({ success: true, data: { loyalty: {} } });
+      const { userId, ticketId, points } = req.body;
+      const result = await LoyaltyService.earnPoints(userId, ticketId, points, req.io);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -17,9 +17,9 @@ class LoyaltyController {
 
   async redeemPoints(req, res, next) {
     try {
-      // const { userId, ticketId, points } = req.body;
-      // const result = await LoyaltyService.redeemPoints(userId, ticketId, points);
-      res.status(200).json({ success: true, data: { loyalty: {} } });
+      const { userId, ticketId, points } = req.body;
+      const result = await LoyaltyService.redeemPoints(userId, ticketId, points, req.io);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -27,9 +27,9 @@ class LoyaltyController {
 
   async getLoyalty(req, res, next) {
     try {
-      // const { userId } = req.params;
-      // const result = await LoyaltyService.getLoyalty(userId);
-      res.status(200).json({ success: true, data: { loyalty: {} } });
+      const { userId } = req.params;
+      const result = await LoyaltyService.getLoyalty(userId);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }

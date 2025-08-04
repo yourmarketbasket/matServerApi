@@ -1,4 +1,4 @@
-// const DriverService = require('../services/driver.service');
+const DriverService = require('../services/driver.service');
 
 /**
  * @class DriverController
@@ -7,9 +7,8 @@
 class DriverController {
   async createDriver(req, res, next) {
     try {
-      // const { saccoId } = req.body;
-      // const result = await DriverService.createDriver(req.body, saccoId);
-      res.status(201).json({ success: true, data: { driver: req.body } });
+      const result = await DriverService.createDriver(req.body, req.io);
+      res.status(201).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -17,9 +16,9 @@ class DriverController {
 
   async getDrivers(req, res, next) {
     try {
-      // const { saccoId } = req.params;
-      // const result = await DriverService.getDriversBySacco(saccoId);
-      res.status(200).json({ success: true, data: { drivers: [] } });
+      const { saccoId } = req.params;
+      const result = await DriverService.getDriversBySacco(saccoId);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -27,9 +26,9 @@ class DriverController {
 
   async updateDriver(req, res, next) {
     try {
-      // const { id } = req.params;
-      // const result = await DriverService.updateDriver(id, req.body);
-      res.status(200).json({ success: true, data: { driver: req.body } });
+      const { id } = req.params;
+      const result = await DriverService.updateDriver(id, req.body, req.io);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -37,9 +36,9 @@ class DriverController {
 
   async getPerformance(req, res, next) {
     try {
-      // const { id } = req.params;
-      // const result = await DriverService.getDriverPerformance(id);
-      res.status(200).json({ success: true, data: { performance: 'sample-metrics' } });
+      const { id } = req.params;
+      const result = await DriverService.getDriverPerformance(id);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }

@@ -192,7 +192,7 @@ class AuthService {
     const { secret, qrCodeDataUrl } = await generateMfaSecret(user.email);
 
     user.mfaSecret = secret;
-    await user.save();
+    await user.save({ validateBeforeSave: false }); // Bypass validation as we are only adding the secret
 
     return { qrCodeDataUrl };
   }
@@ -201,9 +201,10 @@ class AuthService {
    * @description Verifies an MFA code and enables MFA for the user
    * @param {string} userId - The user's ID
    * @param {string} token - The MFA code from the user
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<boolean>}
    */
-  async verifyMFA(userId, token) {
+  async verifyMFA(userId, token, io) {
     const user = await User.findById(userId);
     if (!user || !user.mfaSecret) {
       throw new Error('MFA not set up or user not found.');
@@ -215,7 +216,11 @@ class AuthService {
       throw new Error('Invalid MFA token.');
     }
 
-    // The mfa is now considered fully enabled and verified
+    // The mfa is now considered fully enabled and verified.
+    // We can add a flag to the user model if we want to enforce it from now on.
+    // For now, just emitting an event is sufficient.
+    io.to(userId).emit('mfaEnabled', { userId });
+
     return { success: true };
   }
 }

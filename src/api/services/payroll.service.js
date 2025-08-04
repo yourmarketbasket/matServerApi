@@ -1,6 +1,6 @@
-// const Payroll = require('../models/payroll.model');
-// const Trip = require('../models/trip.model');
-// const Payment = require('../models/payment.model');
+const Payroll = require('../models/payroll.model');
+const Trip = require('../models/trip.model');
+const Payment = require('../models/payment.model');
 
 /**
  * @class PayrollService
@@ -10,14 +10,20 @@ class PayrollService {
   /**
    * @description Processes payroll for a completed trip
    * @param {string} tripId - The ID of the trip
-   * @param {number} systemFee - The system fee to be deducted
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async processPayroll(tripId, systemFee) {
-    console.log(`Processing payroll for trip ${tripId}`);
-    // TODO: Fetch all payments for the trip, calculate total revenue,
-    // apply Sacco/owner/driver cuts, and create a payroll document.
-    return { payroll: { tripId, totalRevenue: 5000, driverCut: 2000, ownerCut: 2500, status: 'completed' } };
+  async processPayroll(tripId, io) {
+    // This is a simplified placeholder. A real implementation would be complex.
+    const payrollData = { tripId, totalRevenue: 10000, systemFee: 100, saccoFee: 900, driverCut: 4000, ownerCut: 5000, status: 'completed' };
+    const payroll = await Payroll.create(payrollData);
+
+    // Notify relevant parties
+    io.to(payroll.ownerId.toString()).emit('payrollProcessed', { payroll });
+    io.to(payroll.driverId.toString()).emit('payrollProcessed', { payroll });
+    io.to(payroll.saccoId.toString()).emit('payrollProcessed', { payroll });
+
+    return { payroll };
   }
 
   /**
@@ -26,9 +32,8 @@ class PayrollService {
    * @returns {Promise<Array<object>>}
    */
   async getPayrollByOwner(ownerId) {
-    console.log(`Fetching payrolls for owner ${ownerId}`);
-    // TODO: Find all payrolls with the matching ownerId
-    return { payrolls: [{ tripId: 'trip123', ownerCut: 2500 }] };
+    const payrolls = await Payroll.find({ ownerId });
+    return { payrolls };
   }
 
   /**
@@ -37,21 +42,26 @@ class PayrollService {
    * @returns {Promise<Array<object>>}
    */
   async getPayrollByDriver(driverId) {
-    console.log(`Fetching payrolls for driver ${driverId}`);
-    // TODO: Find all payrolls with the matching driverId
-    return { payrolls: [{ tripId: 'trip123', driverCut: 2000 }] };
+    const payrolls = await Payroll.find({ driverId });
+    return { payrolls };
   }
 
   /**
    * @description Resolves a disputed payroll record
    * @param {string} id - The ID of the payroll to resolve
    * @param {string} resolution - Details of the resolution
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async resolvePayrollDispute(id, resolution) {
-    console.log(`Resolving payroll dispute ${id} with resolution: ${resolution}`);
-    // TODO: Find payroll by ID, update its status, and log the resolution
-    return { payroll: { _id: id, status: 'completed', resolutionDetails: resolution } };
+  async resolvePayrollDispute(id, resolution, io) {
+    const payroll = await Payroll.findByIdAndUpdate(id, { status: 'completed', resolutionDetails: resolution }, { new: true });
+
+    // Notify relevant parties
+    io.to(payroll.ownerId.toString()).emit('payrollDisputeResolved', { payroll });
+    io.to(payroll.driverId.toString()).emit('payrollDisputeResolved', { payroll });
+    io.to(payroll.saccoId.toString()).emit('payrollDisputeResolved', { payroll });
+
+    return { payroll };
   }
 }
 

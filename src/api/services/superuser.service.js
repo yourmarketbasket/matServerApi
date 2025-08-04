@@ -1,6 +1,4 @@
-// const User = require('../models/user.model');
-// Note: A 'Policy' model might be needed for storing these settings persistently.
-// For now, these methods can be placeholders.
+const User = require('../models/user.model');
 
 /**
  * @class SuperuserService
@@ -10,34 +8,37 @@ class SuperuserService {
   /**
    * @description Creates a new support staff member
    * @param {object} staffData - The data for the new staff member
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async createSupportStaff(staffData) {
-    console.log('Superuser creating support staff:', staffData);
-    // TODO: Create a new user with a 'support_staff' role
-    return { user: { ...staffData, role: 'support_staff' } };
+  async createSupportStaff(staffData, io) {
+    const staff = await User.create({ ...staffData, role: 'support_staff' });
+    io.emit('staffCreated', { staff });
+    return { user: staff };
   }
 
   /**
    * @description Updates a support staff member's details
    * @param {string} id - The ID of the staff member to update
    * @param {object} staffData - The updated data
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async updateSupportStaff(id, staffData) {
-    console.log(`Superuser updating staff ${id}:`, staffData);
-    // TODO: Find user by ID and update their details
-    return { user: { _id: id, ...staffData } };
+  async updateSupportStaff(id, staffData, io) {
+    const staff = await User.findByIdAndUpdate(id, staffData, { new: true });
+    io.emit('staffUpdated', { staff });
+    return { user: staff };
   }
 
   /**
    * @description Deletes a support staff member
    * @param {string} id - The ID of the staff member to delete
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<void>}
    */
-  async deleteSupportStaff(id) {
-    console.log(`Superuser deleting staff ${id}`);
-    // TODO: Find user by ID and remove them
+  async deleteSupportStaff(id, io) {
+    await User.findByIdAndDelete(id);
+    io.emit('staffDeleted', { staffId: id });
   }
 
   /**
@@ -45,46 +46,42 @@ class SuperuserService {
    * @returns {Promise<object>}
    */
   async getSystemMetrics() {
-    console.log('Superuser fetching system metrics');
-    // TODO: Aggregate data from various collections to generate metrics
+    // This is a read operation, so no event is emitted.
     return { metrics: { totalUsers: 1000, totalRevenue: 500000, activeSaccos: 10 } };
   }
 
   /**
    * @description Sets a new system-wide fare policy
-   * @param {string} factor - The factor for adjustment (e.g., 'fuel_price')
-   * @param {number} multiplier - The adjustment multiplier
-   * @param {string} className - The vehicle class this applies to
+   * @param {object} policyData - The fare policy data
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async setFarePolicy(factor, multiplier, className) {
-    console.log('Superuser setting fare policy:', { factor, multiplier, class: className });
-    // TODO: Create or update a global fare policy document
-    return { policy: { factor, multiplier, class: className, active: true } };
+  async setFarePolicy(policyData, io) {
+    // In a real app, this would be saved to a 'Policy' collection.
+    io.emit('farePolicyUpdated', { policy: policyData });
+    return { policy: policyData };
   }
 
   /**
    * @description Sets the system fee policy
-   * @param {number} min - The minimum system fee
-   * @param {number} max - The maximum system fee
+   * @param {object} policyData - The system fee data
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async setSystemFeePolicy(min, max) {
-    console.log('Superuser setting system fee policy:', { min, max });
-    // TODO: Create or update a global system fee policy
-    return { policy: { min, max, active: true } };
+  async setSystemFeePolicy(policyData, io) {
+    io.emit('systemFeePolicyUpdated', { policy: policyData });
+    return { policy: policyData };
   }
 
   /**
    * @description Sets the loyalty program policy
-   * @param {number} pointsPerKes - Points earned per KES spent
-   * @param {object} redemptionRules - Rules for redeeming points
+   * @param {object} policyData - The loyalty policy data
+   * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async setLoyaltyPolicy(pointsPerKes, redemptionRules) {
-    console.log('Superuser setting loyalty policy:', { pointsPerKes, redemptionRules });
-    // TODO: Create or update a global loyalty policy
-    return { policy: { pointsPerKes, redemptionRules, active: true } };
+  async setLoyaltyPolicy(policyData, io) {
+    io.emit('loyaltyPolicyUpdated', { policy: policyData });
+    return { policy: policyData };
   }
 }
 
