@@ -1,45 +1,58 @@
 const CryptoJS = require('crypto-js');
 const config = require('../../config');
 
-const rawKey = config.encryptionKey;
-// prepare the keys
+const {
+  cryptoSecretKey,
+  initializationVector,
+  cryptoPadding,
+  cryptoMode,
+  cryptoAlgorithm,
+} = config;
 
-if (!rawKey) {
-  throw new Error('An ENCRYPTION_KEY must be provided in the environment variables.');
+if (!cryptoSecretKey || !initializationVector || !cryptoPadding || !cryptoMode || !cryptoAlgorithm) {
+  throw new Error('Missing one or more required crypto environment variables.');
 }
 
-// Derive a 32-byte key from the user's secret using SHA-256.
-// This allows the user to provide a key of any length.
-const secretKey = CryptoJS.SHA256(rawKey);
+// Map string config values to CryptoJS objects
+const PADDING_MAP = {
+  PKCS7: CryptoJS.pad.Pkcs7,
+  NoPadding: CryptoJS.pad.NoPadding,
+};
+
+const MODE_MAP = {
+  CBC: CryptoJS.mode.CBC,
+  ECB: CryptoJS.mode.ECB,
+};
+
+const secretKey = CryptoJS.enc.Utf8.parse(cryptoSecretKey);
+const iv = CryptoJS.enc.Hex.parse(initializationVector);
+const padding = PADDING_MAP[cryptoPadding];
+const mode = MODE_MAP[cryptoMode];
 
 /**
- * @description Encrypts a string using AES-256
- * @param {string} text - The text to encrypt
- * @returns {string} The encrypted text (iv:encryptedData)
+ * @description Encrypts a string using the configured algorithm, mode, and padding.
+ * @param {string} text - The text to encrypt.
+ * @returns {string} The encrypted text.
  */
 const encrypt = (text) => {
-  const iv = CryptoJS.lib.WordArray.random(16);
   const encrypted = CryptoJS.AES.encrypt(text, secretKey, {
     iv: iv,
-    padding: CryptoJS.pad.Pkcs7,
-    mode: CryptoJS.mode.CBC,
+    padding: padding,
+    mode: mode,
   });
-  return iv.toString(CryptoJS.enc.Hex) + ':' + encrypted.toString();
+  return encrypted.toString();
 };
 
 /**
- * @description Decrypts a string using AES-256
- * @param {string} encryptedText - The text to decrypt (iv:encryptedData)
- * @returns {string} The decrypted text
+ * @description Decrypts a string using the configured algorithm, mode, and padding.
+ * @param {string} encryptedText - The text to decrypt.
+ * @returns {string} The decrypted text.
  */
 const decrypt = (encryptedText) => {
-  const parts = encryptedText.split(':');
-  const iv = CryptoJS.enc.Hex.parse(parts.shift());
-  const encryptedData = parts.join(':');
-  const decrypted = CryptoJS.AES.decrypt(encryptedData, secretKey, {
+  const decrypted = CryptoJS.AES.decrypt(encryptedText, secretKey, {
     iv: iv,
-    padding: CryptoJS.pad.Pkcs7,
-    mode: CryptoJS.mode.CBC,
+    padding: padding,
+    mode: mode,
   });
   return decrypted.toString(CryptoJS.enc.Utf8);
 };
