@@ -2,6 +2,7 @@ const CryptoJS = require('crypto-js');
 const config = require('../../config');
 
 const rawKey = config.encryptionKey;
+// prepare the keys
 
 if (!rawKey) {
   throw new Error('An ENCRYPTION_KEY must be provided in the environment variables.');
