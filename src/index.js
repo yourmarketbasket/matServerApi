@@ -58,7 +58,7 @@ if (config.nodeEnv === 'development') {
 // Custom Encryption Middleware (globally applied)
 // As per spec, all requests/responses are encrypted.
 // Note: This would need to be disabled for webhook endpoints like payment confirmation.
-app.use(encryptionMiddleware);
+// app.use(encryptionMiddleware); // Temporarily disabled
 
 // --- API Routes ---
 const apiPrefix = '/api/v1';
