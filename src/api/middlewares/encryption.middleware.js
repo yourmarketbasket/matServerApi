@@ -6,9 +6,9 @@ const cryptoUtil = require('../utils/crypto.util');
  */
 const encryptionMiddleware = (req, res, next) => {
   // 1. Decrypt incoming request body
-  if (req.body && req.body.encryptedPayload) {
+  if (req.body && req.body.payload) {
     try {
-      const decryptedBody = cryptoUtil.decrypt(req.body.encryptedPayload);
+      const decryptedBody = cryptoUtil.decrypt(req.body.payload);
       req.body = JSON.parse(decryptedBody);
     } catch (error) {
       console.error('Request decryption error:', error);
