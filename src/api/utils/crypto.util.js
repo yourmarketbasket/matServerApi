@@ -4,7 +4,7 @@ const secretKey = 'X7pL9qW3zT2mK8rY6nJ4vC5bH0tD2gF';
 const iv = '1a2b3c4d5e6f7890a1b2c3d4e5f60789';
 
 const key = CryptoJS.enc.Utf8.parse(secretKey);
-const ivHex = CryptoJS.enc.Hex.parse(iv);
+const ivHex = CryptoJS.enc.Utf8.parse(iv);
 
 /**
  * @description Encrypts a string using AES-256-CBC
