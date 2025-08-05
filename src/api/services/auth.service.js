@@ -10,14 +10,16 @@ const config = require('../../config');
 class AuthService {
   /**
    * @description Authenticates a user
-   * @param {string} email - The user's email
+   * @param {string} emailOrPhone - The user's email or phone
    * @param {string} password - The user's password
    * @param {string} [mfaCode] - The MFA code if required
    * @returns {Promise<{user: object, token: string}>}
    */
-  async login(email, password, mfaCode) {
-    // 1. Find user by email
-    const user = await User.findOne({ email }).select('+password');
+  async login(emailOrPhone, password, mfaCode) {
+    // 1. Find user by email or phone
+    const user = await User.findOne({
+      $or: [{ email: emailOrPhone }, { phone: emailOrPhone }],
+    }).select('+password');
 
     if (!user) {
       throw new Error('Invalid credentials');
