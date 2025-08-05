@@ -26,12 +26,21 @@ const encrypt = (text) => {
  * @returns {string} The decrypted text
  */
 const decrypt = (encryptedText) => {
-  const decrypted = CryptoJS.AES.decrypt(encryptedText, key, {
-    iv: ivHex,
-    padding: CryptoJS.pad.Pkcs7,
-    mode: CryptoJS.mode.CBC,
-  });
-  return decrypted.toString(CryptoJS.enc.Utf8);
+  try {
+    const decrypted = CryptoJS.AES.decrypt(encryptedText, key, {
+      iv: ivHex,
+      padding: CryptoJS.pad.Pkcs7,
+      mode: CryptoJS.mode.CBC,
+    });
+    const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
+    if (!decryptedText) {
+      throw new Error('Decryption resulted in empty string');
+    }
+    return decryptedText;
+  } catch (error) {
+    console.error('Decryption failed:', error);
+    throw new Error('Decryption failed');
+  }
 };
 
 module.exports = {
