@@ -107,6 +107,7 @@ class AuthService {
     }
 
     const { name, email, phone, password } = userData;
+    // force
 
     // 3. Create the superuser
     const superuser = await User.create({
