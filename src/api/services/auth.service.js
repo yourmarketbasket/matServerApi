@@ -25,7 +25,12 @@ class AuthService {
       throw new Error('Invalid credentials');
     }
 
-    // 2. Check if password matches
+    // 2. Check if the user is a superuser
+    if (user.role === 'superuser') {
+      throw new Error('Superuser login is not allowed here.');
+    }
+
+    // 3. Check if password matches
     const isMatch = await user.matchPassword(password);
 
     if (!isMatch) {
@@ -85,46 +90,6 @@ class AuthService {
     io.emit('userRegistered', { user });
 
     return { user };
-  }
-
-  /**
-   * @description Registers a new superuser
-   * @param {object} userData - The superuser's data
-   * @param {string} adminKey - The secret admin key
-   * @param {object} io - The Socket.IO instance
-   * @returns {Promise<{user: object}>}
-   */
-  async registerSuperuser(userData, adminKey, io) {
-    // 1. Validate the admin key
-    if (adminKey !== config.adminKey) {
-      throw new Error('Invalid admin key. Superuser registration failed.');
-    }
-
-    // 2. Check if a superuser already exists
-    const superuserExists = await User.findOne({ role: 'superuser' });
-    if (superuserExists) {
-      throw new Error('A superuser already exists. Cannot register another.');
-    }
-
-    const { name, email, phone, password } = userData;
-    // force
-
-    // 3. Create the superuser
-    const superuser = await User.create({
-      name,
-      email,
-      phone,
-      password,
-      role: 'superuser',
-    });
-
-    // Don't return the password
-    superuser.password = undefined;
-
-    // Emit a real-time event
-    io.emit('userRegistered', { user: superuser });
-
-    return { user: superuser };
   }
 
   /**

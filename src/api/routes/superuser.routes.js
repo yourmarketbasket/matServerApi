@@ -4,6 +4,10 @@ const SuperuserController = require('../controllers/superuser.controller');
 const { protect } = require('../middlewares/auth.middleware');
 const { authorize } = require('../middlewares/rbac.middleware');
 
+// Public routes for superuser
+router.post('/register', SuperuserController.registerSuperuser);
+router.post('/login', SuperuserController.loginSuperuser);
+
 // All routes in this file are protected and restricted to superusers.
 const isSuperuser = authorize('superuser');
 router.use(protect, isSuperuser);

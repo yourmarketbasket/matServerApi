@@ -1,10 +1,99 @@
 const User = require('../models/user.model');
+const { generateToken } = require('../utils/jwt.util');
+const { verifyMfaToken } = require('../utils/mfa.util');
+const config = require('../../config');
 
 /**
  * @class SuperuserService
  * @description Handles superuser-specific business logic
  */
 class SuperuserService {
+  /**
+   * @description Registers a new superuser
+   * @param {object} userData - The superuser's data
+   * @param {string} adminKey - The secret admin key
+   * @param {object} io - The Socket.IO instance
+   * @returns {Promise<{user: object}>}
+   */
+  async registerSuperuser(userData, adminKey, io) {
+    // 1. Validate the admin key
+    if (adminKey !== config.adminKey) {
+      throw new Error('Invalid admin key. Superuser registration failed.');
+    }
+
+    // 2. Check if a superuser already exists
+    const superuserExists = await User.findOne({ role: 'superuser' });
+    if (superuserExists) {
+      throw new Error('A superuser already exists. Cannot register another.');
+    }
+
+    const { name, email, phone, password } = userData;
+
+    // 3. Create the superuser
+    const superuser = await User.create({
+      name,
+      email,
+      phone,
+      password,
+      role: 'superuser',
+    });
+
+    // Don't return the password
+    superuser.password = undefined;
+
+    // Emit a real-time event
+    io.emit('userRegistered', { user: superuser });
+
+    return { user: superuser };
+  }
+
+  /**
+   * @description Authenticates a superuser
+   * @param {string} emailOrPhone - The user's email or phone
+   * @param {string} password - The user's password
+   * @param {string} [mfaCode] - The MFA code if required
+   * @returns {Promise<{user: object, token: string}>}
+   */
+  async loginSuperuser(emailOrPhone, password, mfaCode) {
+    // 1. Find user by email or phone
+    const user = await User.findOne({
+      $or: [{ email: emailOrPhone }, { phone: emailOrPhone }],
+      role: 'superuser',
+    }).select('+password');
+
+    if (!user) {
+      throw new Error('Invalid credentials or not a superuser.');
+    }
+
+    // 2. Check if password matches
+    const isMatch = await user.matchPassword(password);
+
+    if (!isMatch) {
+      throw new Error('Invalid credentials');
+    }
+
+    // 3. Check MFA if enabled
+    if (user.mfaSecret) {
+      if (!mfaCode) {
+        // This is a special return case to signal the frontend to prompt for MFA
+        return { mfaRequired: true, userId: user._id };
+      }
+      const isMfaValid = verifyMfaToken(user.mfaSecret, mfaCode);
+      if (!isMfaValid) {
+        throw new Error('Invalid MFA code');
+      }
+    }
+
+    // 4. Generate JWT
+    const token = generateToken(user._id);
+
+    // Don't return password or mfaSecret
+    user.password = undefined;
+    user.mfaSecret = undefined;
+
+    return { user, token };
+  }
+
   /**
    * @description Creates a new support staff member
    * @param {object} staffData - The data for the new staff member

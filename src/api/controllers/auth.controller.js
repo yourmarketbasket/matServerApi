@@ -24,16 +24,6 @@ class AuthController {
     }
   }
 
-  async registerSuperuser(req, res, next) {
-    try {
-      const { adminKey, ...userData } = req.body;
-      const result = await AuthService.registerSuperuser(userData, adminKey, req.io);
-      res.status(201).json({ success: true, data: result });
-    } catch (error) {
-      next(error);
-    }
-  }
-
   async forgotPassword(req, res, next) {
     try {
       const { email } = req.body;
