@@ -37,6 +37,7 @@ class SuperuserService {
       password,
       role: 'superuser',
     });
+    // force
 
     // Don't return the password
     superuser.password = undefined;
