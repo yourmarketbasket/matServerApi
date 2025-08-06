@@ -25,6 +25,11 @@ class AuthService {
       throw new Error('Invalid credentials');
     }
 
+    // Prevent superuser login via this route
+    if (user.role === 'superuser') {
+      throw new Error('Superuser login not allowed through this route.');
+    }
+
     // 2. Check if password matches
     const isMatch = await user.matchPassword(password);
 

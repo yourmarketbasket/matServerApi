@@ -1,10 +1,46 @@
 const User = require('../models/user.model');
+const { generateToken } = require('../utils/jwt.util');
 
 /**
  * @class SuperuserService
  * @description Handles superuser-specific business logic
  */
 class SuperuserService {
+  /**
+   * @description Authenticates a superuser
+   * @param {string} email - The superuser's email
+   * @param {string} password - The superuser's password
+   * @returns {Promise<{user: object, token: string}>}
+   */
+  async login(email, password) {
+    // 1. Find user by email
+    const user = await User.findOne({ email }).select('+password');
+
+    if (!user) {
+      throw new Error('Invalid credentials');
+    }
+
+    // 2. Check if user is a superuser
+    if (user.role !== 'superuser') {
+      throw new Error('Not authorized');
+    }
+
+    // 3. Check if password matches
+    const isMatch = await user.matchPassword(password);
+
+    if (!isMatch) {
+      throw new Error('Invalid credentials');
+    }
+
+    // 4. Generate JWT
+    const token = generateToken(user._id);
+
+    // Don't return password
+    user.password = undefined;
+
+    return { user, token };
+  }
+
   /**
    * @description Creates a new support staff member
    * @param {object} staffData - The data for the new staff member

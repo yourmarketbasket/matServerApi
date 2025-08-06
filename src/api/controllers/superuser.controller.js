@@ -5,6 +5,16 @@ const SuperuserService = require('../services/superuser.service');
  * @description Controller for superuser-only operations
  */
 class SuperuserController {
+  async login(req, res, next) {
+    try {
+      const { email, password } = req.body;
+      const result = await SuperuserService.login(email, password);
+      res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async createStaff(req, res, next) {
     try {
       const result = await SuperuserService.createSupportStaff(req.body, req.io);
