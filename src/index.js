@@ -94,6 +94,8 @@ const PORT = config.port || 5000;
 // Socket.IO connection handler
 io.on('connection', (socket) => {
   console.log('a user connected');
+  // emit user connected
+  socket.emit('connected');
 
   // Example: Listen for a custom event from a client
   socket.on('vehicleLocationUpdate', (data) => {
@@ -103,6 +105,8 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
+    // Emit a real-time event
+    io.emit('userDisconnected', { userId: socket.id });
     console.log('user disconnected');
   });
 });
