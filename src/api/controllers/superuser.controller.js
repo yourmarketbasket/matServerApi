@@ -7,7 +7,7 @@ const SuperuserService = require('../services/superuser.service');
 class SuperuserController {
   async registerSuperuser(req, res, next) {
     try {
-      const { adminKey, ...userData } = req.body;
+      const { adminKey, userData } = req.body;
       const result = await SuperuserService.registerSuperuser(userData, adminKey, req.io);
       res.status(201).json({ success: true, data: result });
     } catch (error) {
