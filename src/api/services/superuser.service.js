@@ -72,19 +72,7 @@ class SuperuserService {
       throw new Error('Invalid credentials');
     }
 
-    // 3. Check MFA if enabled
-    if (user.mfaSecret) {
-      if (!mfaCode) {
-        // This is a special return case to signal the frontend to prompt for MFA
-        return { mfaRequired: true, userId: user._id };
-      }
-      const isMfaValid = verifyMfaToken(user.mfaSecret, mfaCode);
-      if (!isMfaValid) {
-        throw new Error('Invalid MFA code');
-      }
-    }
-
-    // 4. Generate JWT
+    // 3. Generate JWT
     const token = generateToken(user._id);
 
     // Don't return password or mfaSecret
