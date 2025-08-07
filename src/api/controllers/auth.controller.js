@@ -15,22 +15,30 @@ class AuthController {
     }
   }
 
-  async signup(req, res, next) {
+  async sendOtp(req, res, next) {
     try {
-      const result = await AuthService.signup(req.body, req.io);
-      // After signup, we should also trigger the OTP sending
-      await AuthService.generateAndSendOtp(req.body.email);
-      res.status(201).json({ success: true, data: { user: result.user, message: "Signup successful. Please check your email for a verification OTP." } });
+      const { email } = req.body;
+      await AuthService.generateAndSendOtp(email);
+      res.status(200).json({ success: true, message: 'If an account with that email exists, an OTP has been sent.' });
     } catch (error) {
       next(error);
     }
   }
 
-  async verifySignup(req, res, next) {
+  async verifyOtp(req, res, next) {
     try {
       const { email, otp } = req.body;
-      const result = await AuthService.verifySignup(email, otp);
+      const result = await AuthService.verifyOtpAndIssueToken(email, otp);
       res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async signup(req, res, next) {
+    try {
+      const result = await AuthService.signup(req.body, req.io);
+      res.status(201).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }

@@ -1,6 +1,7 @@
 const User = require('../models/user.model');
 const OTP = require('../models/otp.model');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const { generateToken } = require('../utils/jwt.util');
 const { generateMfaSecret, verifyMfaToken } = require('../utils/mfa.util');
 const { generateOTP } = require('../utils/otp.util');
@@ -70,24 +71,41 @@ class AuthService {
   }
 
   /**
-   * @description Registers a new user
-   * @param {object} userData - The user's data
+   * @description Registers a new user after OTP verification.
+   * @param {object} userData - The user's data, including a verifiedToken
    * @param {object} io - The Socket.IO instance
    * @returns {Promise<{user: object}>}
    */
   async signup(userData, io) {
-    const { name, email, phone, password, role } = userData;
+    const { name, email, phone, password, role, verifiedToken } = userData;
 
-    // Check if user already exists
+    if (!verifiedToken) {
+      throw new Error('Verification token is required.');
+    }
+
+    // 1. Verify the token
+    let decoded;
+    try {
+      decoded = jwt.verify(verifiedToken, config.jwtSecret);
+    } catch (error) {
+      throw new Error('Invalid or expired verification token.');
+    }
+
+    // 2. Check if email in token matches email in request
+    if (decoded.email !== email) {
+      throw new Error('Verification token does not match the provided email.');
+    }
+
+    // 3. Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
       throw new Error('User with that email already exists.');
     }
 
-    // Get permissions for the role
+    // 4. Get permissions for the role
     const permissions = await getPermissionsForRole(role);
 
-    // Create user
+    // 5. Create user (status will default to 'pending')
     const user = await User.create({
       name,
       email,
@@ -97,10 +115,34 @@ class AuthService {
       permissions,
     });
 
-    // Don't return the password
+    // 6. Set approval status based on role
+    let emailBody = '';
+    if (user.role === 'passenger') {
+      user.approvedStatus = 'approved';
+      emailBody = 'Congratulations! Your account is now active. You can log in and start using Safary.';
+    } else {
+      emailBody = 'Welcome to Safary! Your account has been created and is now pending review by an administrator. We will notify you once it has been approved.';
+    }
+
+    await user.save();
+
+    // 7. Send welcome/status notification
+    await NotificationService.sendEmail({
+      to: user.email,
+      subject: 'Welcome to Safary!',
+      context: {
+        title: 'Welcome!',
+        body: emailBody,
+      }
+    });
+
+    // 8. Delete the OTP that was used for this registration
+    await OTP.deleteOne({ email: user.email });
+
+    // 9. Don't return the password
     user.password = undefined;
 
-    // Emit a real-time event
+    // 10. Emit a real-time event
     io.emit('userRegistered', { user });
 
     return { user };
@@ -212,10 +254,11 @@ class AuthService {
    * @returns {Promise<{success: boolean}>}
    */
   async generateAndSendOtp(email) {
-    const user = await User.findOne({ email });
-    if (!user) {
-      // Don't reveal if user exists
-      console.log(`OTP requested for non-existent user: ${email}`);
+    // Check if user already exists. If so, we shouldn't send a signup OTP.
+    // This prevents existing users from being spammed with signup OTPs.
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      // Silently succeed to not reveal if an email is registered.
       return { success: true };
     }
 
@@ -232,7 +275,7 @@ class AuthService {
         subject: 'Your Safary Verification Code',
         context: {
           title: 'Verification Code',
-          body: 'Please use the following code to verify your account. The code is valid for 10 minutes.',
+          body: 'Please use the following code to start your registration with Safary. The code is valid for 10 minutes.',
           otp: otp,
         }
       });
@@ -260,8 +303,7 @@ class AuthService {
     const isMatch = await bcrypt.compare(otp, otpRecord.otp);
 
     if (isMatch) {
-      // OTP is correct, delete it
-      await OTP.findByIdAndDelete(otpRecord._id);
+      // OTP is correct, but don't delete it yet.
       return true;
     }
 
@@ -269,50 +311,25 @@ class AuthService {
   }
 
   /**
-   * @description Verifies a user's OTP after signup and sets their approval status.
+   * @description Verifies an OTP and issues a short-lived token for signup completion.
    * @param {string} email - The user's email
    * @param {string} otp - The OTP from the user
-   * @returns {Promise<{success: boolean, message: string}>}
+   * @returns {Promise<{verifiedToken: string}>}
    */
-  async verifySignup(email, otp) {
+  async verifyOtpAndIssueToken(email, otp) {
     const isOtpValid = await this.verifyOtp(email, otp);
 
     if (!isOtpValid) {
       throw new Error('Invalid or expired OTP.');
     }
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      // This should not happen if OTP was valid, but as a safeguard:
-      throw new Error('User not found.');
-    }
-
-    let message = '';
-    let emailBody = '';
-
-    if (user.role === 'passenger') {
-      user.approvedStatus = 'approved';
-      message = 'Your account has been successfully verified and approved!';
-      emailBody = 'Congratulations! Your account is now active. You can log in and start using Safary.';
-    } else {
-      // For other roles, status remains 'pending' by default
-      message = 'Your account has been verified. It is now pending review by an administrator.';
-      emailBody = 'Your account has been successfully verified and is now pending review. We will notify you once it has been approved.';
-    }
-
-    await user.save();
-
-    // Send welcome/status notification
-    await NotificationService.sendEmail({
-      to: user.email,
-      subject: 'Welcome to Safary!',
-      context: {
-        title: 'Welcome!',
-        body: emailBody,
-      }
+    // OTP is valid, issue a short-lived JWT for completing registration
+    const payload = { email };
+    const verifiedToken = jwt.sign(payload, config.jwtSecret, {
+      expiresIn: '15m', // Token is valid for 15 minutes
     });
 
-    return { success: true, message };
+    return { verifiedToken };
   }
 }
 
