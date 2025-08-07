@@ -264,9 +264,18 @@ class AuthService {
 
     // Generate OTP
     const otp = generateOTP();
+    console.log(`Generated OTP for ${email}: ${otp}`); // Log OTP for debugging
 
     // Save OTP to DB
-    await OTP.create({ email, otp });
+    try {
+      console.log(`Attempting to save OTP for ${email} to the database.`);
+      await OTP.create({ email, otp });
+      console.log(`Successfully saved OTP for ${email} to the database.`);
+    } catch (dbError) {
+      console.error(`Database error saving OTP for ${email}:`, dbError);
+      // Decide if you want to stop the process if the OTP can't be saved
+      throw new Error('Could not save OTP to database.');
+    }
 
     // Send email
     try {

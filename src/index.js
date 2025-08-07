@@ -84,6 +84,26 @@ app.use(`${apiPrefix}/discounts`, discountRoutes);
 app.use(`${apiPrefix}/loyalty`, loyaltyRoutes);
 app.use(`${apiPrefix}/users`, userManagementRoutes);
 
+// --- Temporary Email Test Route ---
+const NotificationService = require('./api/services/notification.service');
+app.get('/test-email', async (req, res) => {
+    try {
+        console.log("--- TRIGGERING EMAIL TEST ---");
+        await new NotificationService().sendEmail({
+            to: 'codethelabs@gmail.com',
+            subject: 'Test Email from Safary',
+            context: {
+                title: 'Hello from Safary!',
+                body: 'This is a test email to confirm that the notification service is working correctly.',
+            }
+        });
+        res.json({ success: true, message: 'Test email sent. Check the console and your inbox.' });
+    } catch (error) {
+        console.error("--- EMAIL TEST FAILED ---", error);
+        res.status(500).json({ success: false, message: 'Email test failed.' });
+    }
+});
+
 // --- Error Handling Middleware ---
 app.use((err, req, res, next) => {
     console.error(err);
