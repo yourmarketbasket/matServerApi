@@ -895,17 +895,14 @@ const permissionsData = {
 };
 
 /**
- * @description Get all permission numbers for a given role from the database.
+ * @description Get all permission numbers for a given role.
+ * It first tries to fetch from the database, and if that's empty,
+ * it falls back to the local permissionsData object.
  * @param {string} role - The role to get permissions for.
  * @returns {Promise<string[]>} An array of permission numbers.
  */
 const getPermissionsForRole = async (role) => {
   const loweredRole = role.toLowerCase();
-
-  if (loweredRole === 'superuser') {
-    const allPermissions = await Permission.find({}, 'permissionNumber');
-    return allPermissions.map(p => p.permissionNumber);
-  }
 
   // A mapping from the roles in the user model to the roles in the permissions JSON
   const roleMapping = {
@@ -914,15 +911,38 @@ const getPermissionsForRole = async (role) => {
     'sacco': 'Sacco',
     'owner': 'Owner',
     'queue manager': 'Queue Manager',
-    'driver': 'Driver'
+    'driver': 'Driver',
+    'passenger': 'Passenger'
   };
   const permissionRole = roleMapping[loweredRole] || role;
 
-  const permissions = await Permission.find(
-    { roles: permissionRole },
-    'permissionNumber'
-  );
-  return permissions.map(p => p.permissionNumber);
+  let permissionsFromDb = [];
+  try {
+    if (loweredRole === 'superuser') {
+      permissionsFromDb = await Permission.find({}, 'permissionNumber');
+    } else {
+      permissionsFromDb = await Permission.find(
+        { roles: permissionRole },
+        'permissionNumber'
+      );
+    }
+  } catch (error) {
+    console.error('Error fetching permissions from database, falling back to local data.', error);
+  }
+
+
+  if (permissionsFromDb.length > 0) {
+    return permissionsFromDb.map(p => p.permissionNumber);
+  }
+
+  // Fallback to local data if DB is not populated
+  if (loweredRole === 'superuser') {
+    return permissionsData.permissions.map(p => p.permissionNumber);
+  }
+
+  return permissionsData.permissions
+    .filter(p => p.roles.includes(permissionRole))
+    .map(p => p.permissionNumber);
 };
 
 module.exports = {
