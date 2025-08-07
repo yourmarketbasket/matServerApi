@@ -1,11 +1,63 @@
-// This service would integrate with external providers like Firebase for push notifications
-// and an SMS gateway (e.g., Twilio, Africa's Talking) for SMS.
+const nodemailer = require('nodemailer');
+const fs = require('fs');
+const path = require('path');
 
-/**
- * @class NotificationService
- * @description Handles sending notifications to users
- */
 class NotificationService {
+  constructor() {
+    this.transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'codethelabs@gmail.com',
+        pass: 'ghgp ihqu yuul ywsm',
+      },
+    });
+    // Load the email template once
+    this.emailTemplate = fs.readFileSync(path.join(__dirname, '../../templates/email.template.html'), 'utf-8');
+  }
+
+  /**
+   * @description Sends an email using a template.
+   * @param {string} to - The recipient's email address.
+   * @param {string} subject - The email subject.
+   * @param {object} context - The dynamic data for the template (e.g., { title, body, otp }).
+   * @returns {Promise<void>}
+   */
+  async sendEmail({ to, subject, context }) {
+    let html = this.emailTemplate;
+
+    // Replace general placeholders
+    html = html.replace('{{title}}', context.title || subject);
+    html = html.replace('{{body}}', context.body || '');
+
+    // Handle OTP section
+    if (context.otp) {
+      const otpSectionHtml = `
+        <div class="otp-section-container">
+            <p>Your One-Time Password is:</p>
+            <div class="otp-code">${context.otp}</div>
+        </div>
+      `;
+      html = html.replace('{{otp_section}}', otpSectionHtml);
+    } else {
+      html = html.replace('{{otp_section}}', ''); // Remove the placeholder if no OTP
+    }
+
+    const mailOptions = {
+      from: '"Safary" <codethelabs@gmail.com>', // Use "Safary" as sender name
+      to,
+      subject,
+      html,
+    };
+
+    try {
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('Email sent: %s', info.messageId);
+    } catch (error) {
+      console.error('Error sending email:', error);
+      throw new Error('Email could not be sent');
+    }
+  }
+
   /**
    * @description Sends a push notification to a user's device
    * @param {string} userId - The ID of the user to notify

@@ -25,6 +25,7 @@ const supportRoutes = require('./api/routes/support.routes');
 const analyticsRoutes = require('./api/routes/analytics.routes');
 const discountRoutes = require('./api/routes/discount.routes');
 const loyaltyRoutes = require('./api/routes/loyalty.routes');
+const userManagementRoutes = require('./api/routes/user.management.routes');
 
 // Connect to MongoDB
 connectDB();
@@ -78,6 +79,7 @@ app.use(`${apiPrefix}/support`, supportRoutes);
 app.use(`${apiPrefix}/analytics`, analyticsRoutes);
 app.use(`${apiPrefix}/discounts`, discountRoutes);
 app.use(`${apiPrefix}/loyalty`, loyaltyRoutes);
+app.use(`${apiPrefix}/users`, userManagementRoutes);
 
 // --- Error Handling Middleware ---
 app.use((err, req, res, next) => {

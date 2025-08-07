@@ -29,7 +29,7 @@ const protect = async (req, res, next) => {
     console.log('Middleware: JWT protection enabled.');
     // For now, attach a dummy user to the request object.
     // The role can be changed to test RBAC.
-    req.user = { _id: 'dummyUserId', role: 'sacco' };
+    req.user = { _id: 'dummyUserId', role: 'admin', permissions: ['P111'] };
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);

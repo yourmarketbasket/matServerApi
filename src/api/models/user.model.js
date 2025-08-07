@@ -34,6 +34,18 @@ const UserSchema = new mongoose.Schema({
     enum: ['passenger', 'sacco', 'owner', 'queue_manager', 'driver', 'support_staff', 'admin', 'superuser'],
     required: true,
   },
+  avatar: {
+    type: String,
+  },
+  approvedStatus: {
+    type: String,
+    enum: ['pending', 'approved', 'suspended', 'blocked'],
+    default: 'pending',
+  },
+  permissions: {
+    type: [String],
+    default: [],
+  },
   mfaSecret: {
     type: String,
   },

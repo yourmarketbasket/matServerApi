@@ -4,17 +4,16 @@ const SaccoController = require('../controllers/sacco.controller');
 const { protect } = require('../middlewares/auth.middleware');
 const { authorize } = require('../middlewares/rbac.middleware');
 
-// Middleware for routes accessible only by support staff
-const isSupport = authorize('support_staff');
-// Middleware for routes accessible by support staff or superusers
-const isSupportOrSuperuser = authorize('support_staff', 'superuser');
+// All routes are protected
+router.use(protect);
 
-router.get('/', protect, isSupportOrSuperuser, SaccoController.getSaccos);
+// Let's assume viewing saccos requires the same permission as adding one.
+router.get('/', authorize('P023'), SaccoController.getSaccos);
 
-router.post('/', protect, isSupport, SaccoController.createSacco);
-router.put('/:id', protect, isSupport, SaccoController.updateSacco);
-router.put('/:id/approve', protect, isSupport, SaccoController.approveSacco);
-router.put('/:id/reject', protect, isSupport, SaccoController.rejectSacco);
-router.delete('/:id', protect, isSupport, SaccoController.deleteSacco);
+router.post('/', authorize('P023'), SaccoController.createSacco);
+router.put('/:id', authorize('P024'), SaccoController.updateSacco);
+router.put('/:id/approve', authorize('P026'), SaccoController.approveSacco);
+router.put('/:id/reject', authorize('P027'), SaccoController.rejectSacco);
+router.delete('/:id', authorize('P025'), SaccoController.deleteSacco);
 
 module.exports = router;

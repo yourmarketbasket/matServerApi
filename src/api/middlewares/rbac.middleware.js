@@ -1,26 +1,30 @@
 /**
- * @description Middleware factory to authorize users based on their roles.
+ * @description Middleware factory to authorize users based on their permissions.
  * This should be used *after* the 'protect' middleware has run.
- * @param {...string} roles - A list of roles that are permitted to access the route.
+ * @param {...string} requiredPermissions - A list of permission numbers required to access the route.
  * @returns {function} Express middleware function
  */
-const authorize = (...roles) => {
+const authorize = (...requiredPermissions) => {
   return (req, res, next) => {
     if (!req.user) {
-        return res.status(403).json({
-            success: false,
-            message: 'User not found. Authorization check failed.'
-        });
-    }
-
-    if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: `User role '${req.user.role}' is not authorized to access this route.`,
+        message: 'User not found. Authorization check failed.'
       });
     }
 
-    console.log(`Middleware: User role '${req.user.role}' authorized for this route.`);
+    const userPermissions = req.user.permissions || [];
+
+    const hasPermission = requiredPermissions.some(p => userPermissions.includes(p));
+
+    if (!hasPermission) {
+      return res.status(403).json({
+        success: false,
+        message: `User does not have the required permissions to access this route.`,
+      });
+    }
+
+    console.log(`Middleware: User with permissions [${userPermissions.join(', ')}] authorized for route requiring one of [${requiredPermissions.join(', ')}].`);
     next();
   };
 };
