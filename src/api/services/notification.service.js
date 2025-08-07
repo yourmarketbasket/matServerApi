@@ -49,18 +49,21 @@ class NotificationService {
       html,
     };
 
-    console.log('--- Preparing to send email ---');
-    console.log('FROM:', mailOptions.from);
-    console.log('TO:', mailOptions.to);
-    console.log('SUBJECT:', mailOptions.subject);
-    console.log('-----------------------------');
+    console.log('[NotificationService.sendEmail] --- Preparing to send email ---');
+    console.log(`[NotificationService.sendEmail] FROM: ${mailOptions.from}`);
+    console.log(`[NotificationService.sendEmail] TO: ${mailOptions.to}`);
+    console.log(`[NotificationService.sendEmail] SUBJECT: ${mailOptions.subject}`);
+    if (context.otp) {
+      console.log(`[NotificationService.sendEmail] CONTEXT includes OTP: ${context.otp}`);
+    }
+    console.log('[NotificationService.sendEmail] -----------------------------');
 
     try {
       const info = await this.transporter.sendMail(mailOptions);
-      console.log('Email sent successfully! Message ID: %s', info.messageId);
-      console.log('Full response from email server:', info);
+      console.log('[NotificationService.sendEmail] Email sent successfully! Message ID: %s', info.messageId);
+      console.log('[NotificationService.sendEmail] Full response from email server:', info);
     } catch (error) {
-      console.error('Error sending email:', error);
+      console.error('[NotificationService.sendEmail] Error sending email:', error);
       throw new Error('Email could not be sent');
     }
   }

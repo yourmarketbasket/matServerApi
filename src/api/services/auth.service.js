@@ -137,7 +137,9 @@ class AuthService {
     });
 
     // 8. Delete the OTP that was used for this registration
+    console.log(`[AuthService.signup] Deleting OTP for email: ${user.email}`);
     await OTP.deleteOne({ email: user.email });
+    console.log(`[AuthService.signup] Successfully deleted OTP for email: ${user.email}`);
 
     // 9. Don't return the password
     user.password = undefined;
@@ -254,31 +256,26 @@ class AuthService {
    * @returns {Promise<{success: boolean}>}
    */
   async generateAndSendOtp(email) {
-    // Check if user already exists. If so, we shouldn't send a signup OTP.
-    // This prevents existing users from being spammed with signup OTPs.
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      // Silently succeed to not reveal if an email is registered.
-      return { success: true };
-    }
+    console.log(`[AuthService.generateAndSendOtp] Received request to generate OTP for email: ${email}`);
 
     // Generate OTP
     const otp = generateOTP();
-    console.log(`Generated OTP for ${email}: ${otp}`); // Log OTP for debugging
+    console.log(`[AuthService.generateAndSendOtp] Generated OTP for ${email}: ${otp}`);
 
     // Save OTP to DB
     try {
-      console.log(`Attempting to save OTP for ${email} to the database.`);
-      await OTP.create({ email, otp });
-      console.log(`Successfully saved OTP for ${email} to the database.`);
+      console.log(`[AuthService.generateAndSendOtp] Attempting to save OTP for ${email} to the database.`);
+      // Atomically find and update or create a new OTP
+      await OTP.findOneAndUpdate({ email }, { otp }, { upsert: true, new: true, setDefaultsOnInsert: true });
+      console.log(`[AuthService.generateAndSendOtp] Successfully saved OTP for ${email} to the database.`);
     } catch (dbError) {
-      console.error(`Database error saving OTP for ${email}:`, dbError);
-      // Decide if you want to stop the process if the OTP can't be saved
+      console.error(`[AuthService.generateAndSendOtp] Database error saving OTP for ${email}:`, dbError);
       throw new Error('Could not save OTP to database.');
     }
 
     // Send email
     try {
+      console.log(`[AuthService.generateAndSendOtp] Attempting to send OTP email to ${email}.`);
       await NotificationService.sendEmail({
         to: email,
         subject: 'Your Safary Verification Code',
@@ -288,11 +285,14 @@ class AuthService {
           otp: otp,
         }
       });
+      console.log(`[AuthService.generateAndSendOtp] Successfully queued OTP email for ${email}.`);
     } catch (error) {
-      console.error(`Failed to send OTP to ${email}`, error);
-      // Even if email fails, we don't want to inform the user, as it could be part of an attack
+      console.error(`[AuthService.generateAndSendOtp] Failed to send OTP email to ${email}:`, error);
+      // We are not throwing an error here to prevent leaking information about email existence.
+      // The client will not know whether the email was sent or not.
     }
 
+    console.log(`[AuthService.generateAndSendOtp] OTP process completed for ${email}.`);
     return { success: true };
   }
 
@@ -303,20 +303,24 @@ class AuthService {
    * @returns {Promise<boolean>}
    */
   async verifyOtp(email, otp) {
+    console.log(`[AuthService.verifyOtp] Attempting to verify OTP for ${email}.`);
     const otpRecord = await OTP.findOne({ email }).sort({ createdAt: -1 });
 
     if (!otpRecord) {
-      return false; // No OTP record found
+      console.error(`[AuthService.verifyOtp] No OTP record found for ${email}.`);
+      throw new Error('OTP_NOT_FOUND');
     }
 
     const isMatch = await bcrypt.compare(otp, otpRecord.otp);
 
-    if (isMatch) {
-      // OTP is correct, but don't delete it yet.
-      return true;
+    if (!isMatch) {
+      console.error(`[AuthService.verifyOtp] OTP mismatch for ${email}.`);
+      throw new Error('OTP_MISMATCH');
     }
 
-    return false; // OTP does not match
+    console.log(`[AuthService.verifyOtp] OTP successfully verified for ${email}.`);
+    // OTP is correct, but don't delete it yet. It will be deleted upon successful signup.
+    return true;
   }
 
   /**
@@ -326,19 +330,27 @@ class AuthService {
    * @returns {Promise<{verifiedToken: string}>}
    */
   async verifyOtpAndIssueToken(email, otp) {
-    const isOtpValid = await this.verifyOtp(email, otp);
+    console.log(`[AuthService.verifyOtpAndIssueToken] Received request for ${email}.`);
+    try {
+      await this.verifyOtp(email, otp);
 
-    if (!isOtpValid) {
-      throw new Error('Invalid or expired OTP.');
+      // OTP is valid, issue a short-lived JWT for completing registration
+      const payload = { email };
+      const verifiedToken = jwt.sign(payload, config.jwtSecret, {
+        expiresIn: '15m', // Token is valid for 15 minutes
+      });
+
+      console.log(`[AuthService.verifyOtpAndIssueToken] Successfully issued verification token for ${email}.`);
+      return { verifiedToken };
+    } catch (error) {
+      console.error(`[AuthService.verifyOtpAndIssueToken] Verification failed for ${email}: ${error.message}`);
+      // Translate internal errors to a user-friendly message
+      if (error.message === 'OTP_NOT_FOUND' || error.message === 'OTP_MISMATCH') {
+        throw new Error('Invalid or expired OTP.');
+      }
+      // Re-throw other unexpected errors
+      throw error;
     }
-
-    // OTP is valid, issue a short-lived JWT for completing registration
-    const payload = { email };
-    const verifiedToken = jwt.sign(payload, config.jwtSecret, {
-      expiresIn: '15m', // Token is valid for 15 minutes
-    });
-
-    return { verifiedToken };
   }
 }
 
