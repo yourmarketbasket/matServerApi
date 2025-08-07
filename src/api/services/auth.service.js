@@ -113,6 +113,7 @@ class AuthService {
       password,
       role,
       permissions,
+      verified: { email: true, phone: false },
     });
 
     // 6. Set approval status based on role
@@ -383,6 +384,26 @@ class AuthService {
       // Re-throw other unexpected errors
       throw error;
     }
+  }
+
+  /**
+   * @description Verifies a user's phone number (stub).
+   * @param {string} userId - The user's ID.
+   * @returns {Promise<object>}
+   */
+  async verifyPhone(userId) {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // In a real implementation, we would send an OTP to the user's phone
+    // and have another method to verify it.
+    // For this stub, we'll just mark the phone as verified.
+    user.verified.phone = true;
+    await user.save();
+
+    return { success: true, message: 'Phone number verified successfully.' };
   }
 }
 

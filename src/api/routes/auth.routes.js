@@ -15,4 +15,7 @@ router.post('/reset-password', AuthController.resetPassword);
 router.post('/mfa/setup', protect, AuthController.setupMFA);
 router.post('/mfa/verify', protect, AuthController.verifyMFA);
 
+// Protected route for phone verification
+router.post('/verify-phone', protect, AuthController.verifyPhone);
+
 module.exports = router;

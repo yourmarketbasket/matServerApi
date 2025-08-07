@@ -46,6 +46,13 @@ const UserSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+  verified: {
+    type: {
+      email: { type: Boolean, default: false },
+      phone: { type: Boolean, default: false },
+    },
+    default: { email: false, phone: false },
+  },
   mfaSecret: {
     type: String,
   },

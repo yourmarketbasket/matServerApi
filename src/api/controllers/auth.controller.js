@@ -83,6 +83,16 @@ class AuthController {
       next(error);
     }
   }
+
+  async verifyPhone(req, res, next) {
+    try {
+      const { id } = req.user; // from protect middleware
+      const result = await AuthService.verifyPhone(id);
+      res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new AuthController();
