@@ -105,8 +105,8 @@ class AuthService {
     // 4. Get permissions for the role
     const permissions = await getPermissionsForRole(role);
 
-    // 5. Prepare user data
-    const newUser = {
+    // 5. Create a new user instance
+    const user = new User({
       name,
       email,
       phone,
@@ -114,19 +114,19 @@ class AuthService {
       role,
       permissions,
       verified: { email: true, phone: false },
-      approvedStatus: 'pending',
-    };
+    });
 
+    // 6. Set approval status based on role
     let emailBody = '';
-    if (role === 'passenger') {
-      newUser.approvedStatus = 'approved';
+    if (user.role === 'passenger') {
+      user.approvedStatus = 'approved';
       emailBody = 'Congratulations! Your account is now active. You can log in and start using Safary.';
     } else {
       emailBody = 'Welcome to Safary! Your account has been created and is now pending review by an administrator. We will notify you once it has been approved.';
     }
 
-    // 6. Create user in a single step
-    const user = await User.create(newUser);
+    // 7. Save the new user
+    await user.save();
 
     // 7. Send welcome/status notification
     await NotificationService.sendEmail({

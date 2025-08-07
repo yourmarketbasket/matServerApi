@@ -34,8 +34,8 @@ class SuperuserService {
     // 3. Get all permissions for the superuser
     const allPermissions = await getPermissionsForRole('superuser');
 
-    // 4. Prepare superuser data
-    const newSuperuser = {
+    // 4. Create a new user instance
+    const superuser = new User({
       name,
       email,
       phone,
@@ -44,10 +44,10 @@ class SuperuserService {
       approvedStatus: 'approved',
       permissions: allPermissions,
       verified: { email: true, phone: false }, // Superuser is created via a trusted process
-    };
+    });
 
-    // 5. Create the superuser in a single step
-    const superuser = await User.create(newSuperuser);
+    // 5. Save the new superuser
+    await superuser.save();
 
     // Don't return the password
     superuser.password = undefined;

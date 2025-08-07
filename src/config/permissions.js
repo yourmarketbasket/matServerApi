@@ -6,7 +6,7 @@ const permissionsData = {
     {
       "permissionNumber": "P001",
       "description": "Log in to the system",
-      "roles": ["Superuser", "Support Staff", "Admin", "Sacco", "Owner", "Queue Manager", "Driver"],
+      "roles": ["Superuser", "Support Staff", "Admin", "Sacco", "Owner", "Queue Manager", "Driver", "Passenger"],
       "modulePage": "Login Page",
       "httpMethod": "POST",
       "constraints": "MFA required for Superuser/Support Staff; JWT issued"
@@ -30,7 +30,7 @@ const permissionsData = {
     {
       "permissionNumber": "P004",
       "description": "Request password reset OTP",
-      "roles": ["Superuser", "Support Staff", "Admin", "Sacco", "Owner", "Queue Manager", "Driver"],
+      "roles": ["Superuser", "Support Staff", "Admin", "Sacco", "Owner", "Queue Manager", "Driver", "Passenger"],
       "modulePage": "Forgot Password Page",
       "httpMethod": "POST",
       "constraints": "Valid email/phone required"
@@ -62,7 +62,7 @@ const permissionsData = {
     {
       "permissionNumber": "P008",
       "description": "Log out of the system",
-      "roles": ["Superuser", "Support Staff", "Admin", "Sacco", "Owner", "Queue Manager", "Driver"],
+      "roles": ["Superuser", "Support Staff", "Admin", "Sacco", "Owner", "Queue Manager", "Driver", "Passenger"],
       "modulePage": "Any",
       "httpMethod": "POST",
       "constraints": "Clears JWT from local storage"
