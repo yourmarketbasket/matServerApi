@@ -255,6 +255,8 @@ class AuthService {
    * @param {string} email - The user's email
    * @returns {Promise<{success: boolean}>}
    */
+
+  // force
   async generateAndSendOtp(email) {
     console.log(`[AuthService.generateAndSendOtp] Received request to generate OTP for email: ${email}`);
 
