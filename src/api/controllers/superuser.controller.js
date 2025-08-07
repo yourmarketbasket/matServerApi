@@ -89,6 +89,54 @@ class SuperuserController {
       next(error);
     }
   }
+
+  // Permission management
+  async syncPermissions(req, res, next) {
+    try {
+      await SuperuserService.syncPermissions();
+      res.status(200).json({ success: true, message: 'Permissions synchronized successfully' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getPermissions(req, res, next) {
+    try {
+      const permissions = await SuperuserService.getPermissions();
+      res.status(200).json({ success: true, data: permissions });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async createPermission(req, res, next) {
+    try {
+      const permission = await SuperuserService.createPermission(req.body);
+      res.status(201).json({ success: true, data: permission });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updatePermission(req, res, next) {
+    try {
+      const { id } = req.params;
+      const permission = await SuperuserService.updatePermission(id, req.body);
+      res.status(200).json({ success: true, data: permission });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deletePermission(req, res, next) {
+    try {
+      const { id } = req.params;
+      await SuperuserService.deletePermission(id);
+      res.status(200).json({ success: true, message: 'Permission deleted successfully' });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new SuperuserController();

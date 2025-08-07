@@ -1,7 +1,9 @@
 const User = require('../models/user.model');
+const Permission = require('../models/permission.model');
 const { generateToken } = require('../utils/jwt.util');
 const { verifyMfaToken } = require('../utils/mfa.util');
 const config = require('../../config');
+const { permissionsData } = require('../../config/permissions');
 
 /**
  * @class SuperuserService
@@ -37,6 +39,13 @@ class SuperuserService {
       password,
       role: 'superuser',
     });
+
+    // Assign all permissions to the superuser
+    const allPermissions = await Permission.find({});
+    superuser.permissions = allPermissions.map(p => p.permissionNumber);
+    await superuser.save();
+
+
     // force
 
     // Don't return the password
@@ -160,6 +169,28 @@ class SuperuserService {
   async setLoyaltyPolicy(policyData, io) {
     io.emit('loyaltyPolicyUpdated', { policy: policyData });
     return { policy: policyData };
+  }
+
+  // Permission management
+  async syncPermissions() {
+    await Permission.deleteMany({});
+    await Permission.insertMany(permissionsData.permissions);
+  }
+
+  async getPermissions() {
+    return await Permission.find({});
+  }
+
+  async createPermission(permissionData) {
+    return await Permission.create(permissionData);
+  }
+
+  async updatePermission(id, permissionData) {
+    return await Permission.findByIdAndUpdate(id, permissionData, { new: true });
+  }
+
+  async deletePermission(id) {
+    return await Permission.findByIdAndDelete(id);
   }
 }
 

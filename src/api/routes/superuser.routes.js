@@ -25,4 +25,11 @@ router.post('/fare-policy', authorize('P013', 'P014', 'P015'), SuperuserControll
 router.post('/system-fee', authorize('P016', 'P017', 'P018'), SuperuserController.setSystemFee);
 router.post('/loyalty-policy', authorize('P019', 'P020', 'P021'), SuperuserController.setLoyaltyPolicy);
 
+// Permission management routes
+router.post('/permissions/sync', authorize('P111'), SuperuserController.syncPermissions);
+router.get('/permissions', authorize('P111'), SuperuserController.getPermissions);
+router.post('/permissions', authorize('P111'), SuperuserController.createPermission);
+router.put('/permissions/:id', authorize('P111'), SuperuserController.updatePermission);
+router.delete('/permissions/:id', authorize('P111'), SuperuserController.deletePermission);
+
 module.exports = router;
