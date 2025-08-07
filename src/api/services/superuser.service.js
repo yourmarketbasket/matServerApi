@@ -3,7 +3,7 @@ const Permission = require('../models/permission.model');
 const { generateToken } = require('../utils/jwt.util');
 const { verifyMfaToken } = require('../utils/mfa.util');
 const config = require('../../config');
-const { permissionsData } = require('../../config/permissions');
+const { permissionsData, getPermissionsForRole } = require('../../config/permissions');
 
 /**
  * @class SuperuserService
@@ -31,23 +31,23 @@ class SuperuserService {
 
     const { name, email, phone, password } = userData;
 
-    // 3. Create the superuser
-    const superuser = await User.create({
+    // 3. Get all permissions for the superuser
+    const allPermissions = await getPermissionsForRole('superuser');
+
+    // 4. Prepare superuser data
+    const newSuperuser = {
       name,
       email,
       phone,
       password,
       role: 'superuser',
       approvedStatus: 'approved',
-    });
+      permissions: allPermissions,
+      verified: { email: true, phone: false }, // Superuser is created via a trusted process
+    };
 
-    // Assign all permissions to the superuser
-    const allPermissions = await Permission.find({});
-    superuser.permissions = allPermissions.map(p => p.permissionNumber);
-    await superuser.save();
-
-
-    // force
+    // 5. Create the superuser in a single step
+    const superuser = await User.create(newSuperuser);
 
     // Don't return the password
     superuser.password = undefined;
