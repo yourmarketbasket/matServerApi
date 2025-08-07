@@ -31,6 +31,8 @@ class NotificationService {
 
     // Handle OTP section
     if (context.otp) {
+      // Replace the main body with the OTP-specific message
+      context.body = 'Please use the following code to start your registration with Safary. The code is valid for 15 minutes.';
       const otpSectionHtml = `
         <div class="otp-section-container">
             <p>Your One-Time Password is:</p>
@@ -41,6 +43,10 @@ class NotificationService {
     } else {
       html = html.replace('{{otp_section}}', ''); // Remove the placeholder if no OTP
     }
+
+    // Replace general placeholders again in case they were changed by the OTP logic
+    html = html.replace('{{title}}', context.title || subject);
+    html = html.replace('{{body}}', context.body || '');
 
     const mailOptions = {
       from: '"Safary" <codethelabs@gmail.com>', // Use "Safary" as sender name
