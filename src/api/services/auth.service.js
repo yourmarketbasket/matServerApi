@@ -13,10 +13,6 @@ const config = require('../../config');
  * @description Handles authentication logic
  */
 class AuthService {
-  constructor() {
-    this.notificationService = new NotificationService();
-  }
-
   /**
    * @description Authenticates a user
    * @param {string} emailOrPhone - The user's email or phone
@@ -231,7 +227,7 @@ class AuthService {
 
     // Send email
     try {
-      await this.notificationService.sendEmail({
+      await NotificationService.sendEmail({
         to: email,
         subject: 'Your Safary Verification Code',
         context: {
@@ -307,7 +303,7 @@ class AuthService {
     await user.save();
 
     // Send welcome/status notification
-    await this.notificationService.sendEmail({
+    await NotificationService.sendEmail({
       to: user.email,
       subject: 'Welcome to Safary!',
       context: {
