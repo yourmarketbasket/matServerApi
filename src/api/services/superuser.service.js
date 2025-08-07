@@ -38,6 +38,7 @@ class SuperuserService {
       phone,
       password,
       role: 'superuser',
+      approvedStatus: 'approved',
     });
 
     // Assign all permissions to the superuser
