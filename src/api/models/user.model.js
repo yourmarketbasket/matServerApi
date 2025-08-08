@@ -50,7 +50,7 @@ const UserSchema = new mongoose.Schema({
       'Intern',
       'Ordinary',
     ],
-    default: 'Staff',
+    default: 'Ordinary',
   },
   avatar: {
     type: String,

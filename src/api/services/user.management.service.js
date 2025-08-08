@@ -2,35 +2,9 @@ const User = require('../models/user.model');
 
 /**
  * @class UserManagementService
- * @description Handles user management logic for admins/superusers
+ * @description Handles user management logic.
  */
 class UserManagementService {
-  /**
-   * @description Updates a user's approval status
-   * @param {string} userId - The ID of the user to update
-   * @param {string} status - The new status
-   * @returns {Promise<object>} The updated user object
-   */
-  async updateUserStatus(userId, status) {
-    // Validate status
-    const validStatuses = ['pending', 'approved', 'suspended', 'blocked'];
-    if (!validStatuses.includes(status)) {
-      throw new Error('Invalid status provided.');
-    }
-
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { approvedStatus: status },
-      { new: true }
-    );
-
-    if (!user) {
-      throw new Error('User not found.');
-    }
-
-    return user;
-  }
-
   /**
    * @description Get all users
    * @returns {Promise<object[]>} A list of all users
@@ -54,6 +28,28 @@ class UserManagementService {
   }
 
   /**
+   * @description Updates a user's approval status
+   * @param {string} userId - The ID of the user to update
+   * @param {string} status - The new status
+   * @returns {Promise<object>} The updated user object
+   */
+  async updateUserStatus(userId, status) {
+    const validStatuses = ['pending', 'approved', 'suspended', 'blocked'];
+    if (!validStatuses.includes(status)) {
+      throw new Error('Invalid status provided.');
+    }
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { approvedStatus: status },
+      { new: true, runValidators: true }
+    );
+    if (!user) {
+      throw new Error('User not found.');
+    }
+    return user;
+  }
+
+  /**
    * @description Updates a user's rank
    * @param {string} userId - The ID of the user to update
    * @param {string} rank - The new rank
@@ -65,21 +61,19 @@ class UserManagementService {
       { rank },
       { new: true, runValidators: true }
     );
-
     if (!user) {
       throw new Error('User not found.');
     }
-
     return user;
   }
 
   /**
-   * @description Adds a permission or a list of permissions to a user.
+   * @description Adds one or more permissions to a user.
    * @param {string} userId - The ID of the user to update.
    * @param {string|string[]} permissions - The permission or permissions to add.
    * @returns {Promise<object>} The updated user object.
    */
-  async addUserPermission(userId, permissions) {
+  async addUserPermissions(userId, permissions) {
     const user = await User.findById(userId);
     if (!user) {
       throw new Error('User not found.');
@@ -89,13 +83,11 @@ class UserManagementService {
     const newPermissions = [];
 
     for (const p of permissionsToAdd) {
-      // Avoid adding duplicates that are already on the user or in the current request
       if (!user.permissions.includes(p) && !newPermissions.includes(p)) {
         newPermissions.push(p);
       }
     }
 
-    // If all provided permissions already exist on the user, no need to save.
     if (newPermissions.length === 0) {
       return user;
     }
@@ -112,18 +104,14 @@ class UserManagementService {
    * @returns {Promise<object>} The updated user object
    */
   async removeUserPermission(userId, permission) {
-    const user = await User.findById(userId);
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { permissions: permission } },
+      { new: true }
+    );
     if (!user) {
       throw new Error('User not found.');
     }
-
-    const permissionIndex = user.permissions.indexOf(permission);
-    if (permissionIndex === -1) {
-      throw new Error('User does not have this permission.');
-    }
-
-    user.permissions.splice(permissionIndex, 1);
-    await user.save();
     return user;
   }
 }

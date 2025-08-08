@@ -55,20 +55,18 @@ class UserManagementController {
     }
   }
 
-  async addUserPermission(req, res, next) {
+  async addUserPermissions(req, res, next) {
     try {
       const { id } = req.params;
       if (!id) {
         return next(new Error('User ID is missing from the request URL.'));
       }
       const { permission, permissions } = req.body;
-
       if (!permission && !permissions) {
         return next(new Error('Request body must contain either "permission" (string) or "permissions" (array of strings).'));
       }
-
       const permsToAdd = permissions || permission;
-      const user = await UserManagementService.addUserPermission(id, permsToAdd);
+      const user = await UserManagementService.addUserPermissions(id, permsToAdd);
       res.status(200).json({ success: true, data: user });
     } catch (error) {
       next(error);
@@ -81,10 +79,7 @@ class UserManagementController {
       if (!id || !permission) {
         return next(new Error('User ID or permission is missing from the request URL.'));
       }
-      const user = await UserManagementService.removeUserPermission(
-        id,
-        permission
-      );
+      const user = await UserManagementService.removeUserPermission(id, permission);
       res.status(200).json({ success: true, data: user });
     } catch (error) {
       next(error);
