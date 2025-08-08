@@ -14,7 +14,7 @@ const permissionsData = {
     {
       "permissionNumber": "P002",
       "description": "Sign up as Support Staff or Admin",
-      "roles": ["Support Staff", "Admin"],
+      "roles": ["Support Staff", "Admin", "Superuser"],
       "modulePage": "Sign-Up Page",
       "httpMethod": "POST",
       "constraints": "Initiated by Superuser (for Support Staff) or Admin (for Admins)"
@@ -182,7 +182,7 @@ const permissionsData = {
     {
       "permissionNumber": "P023",
       "description": "Add Sacco",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "Sacco Management Page",
       "httpMethod": "POST",
       "constraints": "NTSA compliance verification required"
@@ -190,7 +190,7 @@ const permissionsData = {
     {
       "permissionNumber": "P024",
       "description": "Edit Sacco details",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "Sacco Management Page",
       "httpMethod": "PUT",
       "constraints": "Sacco ID must exist"
@@ -198,7 +198,7 @@ const permissionsData = {
     {
       "permissionNumber": "P025",
       "description": "Delete Sacco",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "Sacco Management Page",
       "httpMethod": "DELETE",
       "constraints": "Sacco must have no active trips/vehicles"
@@ -206,7 +206,7 @@ const permissionsData = {
     {
       "permissionNumber": "P026",
       "description": "Approve Sacco application",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "Sacco Management Page",
       "httpMethod": "PUT",
       "constraints": "Sacco must be in pending status"
@@ -214,7 +214,7 @@ const permissionsData = {
     {
       "permissionNumber": "P027",
       "description": "Reject Sacco application",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "Sacco Management Page",
       "httpMethod": "PUT",
       "constraints": "Reason must be provided"
@@ -222,7 +222,7 @@ const permissionsData = {
     {
       "permissionNumber": "P028",
       "description": "View real-time trip/bus data",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "System Monitoring Page",
       "httpMethod": "GET",
       "constraints": "None"
@@ -230,7 +230,7 @@ const permissionsData = {
     {
       "permissionNumber": "P029",
       "description": "View system alerts",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "System Monitoring Page",
       "httpMethod": "GET",
       "constraints": "None"
@@ -238,7 +238,7 @@ const permissionsData = {
     {
       "permissionNumber": "P030",
       "description": "Handle fare disputes",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "Inquiry Management Page",
       "httpMethod": "POST",
       "constraints": "Dispute must be open"
@@ -246,7 +246,7 @@ const permissionsData = {
     {
       "permissionNumber": "P031",
       "description": "Handle loyalty program inquiries",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "Inquiry Management Page",
       "httpMethod": "POST",
       "constraints": "Inquiry must be open"
@@ -254,7 +254,7 @@ const permissionsData = {
     {
       "permissionNumber": "P032",
       "description": "Assist with driver mechanical issues",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "Driver Support Page",
       "httpMethod": "POST",
       "constraints": "Valid driver/vehicle ID required"
@@ -262,7 +262,7 @@ const permissionsData = {
     {
       "permissionNumber": "P033",
       "description": "Assist with passenger disputes",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "Driver Support Page",
       "httpMethod": "POST",
       "constraints": "Valid ticket ID required"
@@ -270,7 +270,7 @@ const permissionsData = {
     {
       "permissionNumber": "P034",
       "description": "Review ticket reallocations",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "Cancellation/Reallocation Page",
       "httpMethod": "GET",
       "constraints": "None"
@@ -278,7 +278,7 @@ const permissionsData = {
     {
       "permissionNumber": "P035",
       "description": "Authorize ticket refunds",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "Cancellation/Reallocation Page",
       "httpMethod": "POST",
       "constraints": "Ticket must be canceled"
@@ -286,7 +286,7 @@ const permissionsData = {
     {
       "permissionNumber": "P036",
       "description": "Authorize waitlist reallocations",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "Cancellation/Reallocation Page",
       "httpMethod": "POST",
       "constraints": "New trip must have available seats"
@@ -294,7 +294,7 @@ const permissionsData = {
     {
       "permissionNumber": "P037",
       "description": "Resolve payroll disputes",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "Payroll Disputes Page",
       "httpMethod": "POST",
       "constraints": "Dispute must be open"
@@ -302,7 +302,7 @@ const permissionsData = {
     {
       "permissionNumber": "P038",
       "description": "Generate trip reports",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "Reports Page",
       "httpMethod": "GET",
       "constraints": "Date range required"
@@ -310,7 +310,7 @@ const permissionsData = {
     {
       "permissionNumber": "P039",
       "description": "Generate fare reports",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "Reports Page",
       "httpMethod": "GET",
       "constraints": "Date range required"
@@ -318,7 +318,7 @@ const permissionsData = {
     {
       "permissionNumber": "P040",
       "description": "Generate loyalty reports",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "Reports Page",
       "httpMethod": "GET",
       "constraints": "Date range required"
@@ -326,7 +326,7 @@ const permissionsData = {
     {
       "permissionNumber": "P041",
       "description": "Generate system fee reports",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "Reports Page",
       "httpMethod": "GET",
       "constraints": "Date range required"
@@ -334,7 +334,7 @@ const permissionsData = {
     {
       "permissionNumber": "P042",
       "description": "Escalate unresolved inquiries",
-      "roles": ["Support Staff"],
+      "roles": ["Support Staff", "Superuser"],
       "modulePage": "Escalation Page",
       "httpMethod": "POST",
       "constraints": "Inquiry must be open"
@@ -342,7 +342,7 @@ const permissionsData = {
     {
       "permissionNumber": "P043",
       "description": "View support staff performance metrics",
-      "roles": ["Admin"],
+      "roles": ["Admin", "Superuser"],
       "modulePage": "Performance Monitoring Page",
       "httpMethod": "GET",
       "constraints": "None"
@@ -350,7 +350,7 @@ const permissionsData = {
     {
       "permissionNumber": "P044",
       "description": "Resolve escalated fare disputes",
-      "roles": ["Admin"],
+      "roles": ["Admin", "Superuser"],
       "modulePage": "Escalation Queue Page",
       "httpMethod": "POST",
       "constraints": "Dispute must be escalated"
@@ -358,7 +358,7 @@ const permissionsData = {
     {
       "permissionNumber": "P045",
       "description": "Resolve escalated payroll disputes",
-      "roles": ["Admin"],
+      "roles": ["Admin", "Superuser"],
       "modulePage": "Escalation Queue Page",
       "httpMethod": "POST",
       "constraints": "Dispute must be escalated"
@@ -366,7 +366,7 @@ const permissionsData = {
     {
       "permissionNumber": "P046",
       "description": "Generate system-wide trip reports",
-      "roles": ["Admin"],
+      "roles": ["Admin", "Superuser"],
       "modulePage": "System Reports Page",
       "httpMethod": "GET",
       "constraints": "Date range required"
@@ -374,7 +374,7 @@ const permissionsData = {
     {
       "permissionNumber": "P047",
       "description": "Generate system-wide fare reports",
-      "roles": ["Admin"],
+      "roles": ["Admin", "Superuser"],
       "modulePage": "System Reports Page",
       "httpMethod": "GET",
       "constraints": "Date range required"
@@ -382,7 +382,7 @@ const permissionsData = {
     {
       "permissionNumber": "P048",
       "description": "Generate system-wide loyalty reports",
-      "roles": ["Admin"],
+      "roles": ["Admin", "Superuser"],
       "modulePage": "System Reports Page",
       "httpMethod": "GET",
       "constraints": "Date range required"
@@ -390,7 +390,7 @@ const permissionsData = {
     {
       "permissionNumber": "P049",
       "description": "Generate system-wide payroll reports",
-      "roles": ["Admin"],
+      "roles": ["Admin", "Superuser"],
       "modulePage": "System Reports Page",
       "httpMethod": "GET",
       "constraints": "Date range required"
@@ -398,7 +398,7 @@ const permissionsData = {
     {
       "permissionNumber": "P050",
       "description": "Generate system fee reports",
-      "roles": ["Admin"],
+      "roles": ["Admin", "Superuser"],
       "modulePage": "System Reports Page",
       "httpMethod": "GET",
       "constraints": "Date range required"
@@ -406,7 +406,7 @@ const permissionsData = {
     {
       "permissionNumber": "P051",
       "description": "Add route",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Route Management Page",
       "httpMethod": "POST",
       "constraints": "Must comply with Superuser fare rules"
@@ -414,7 +414,7 @@ const permissionsData = {
     {
       "permissionNumber": "P052",
       "description": "Edit route",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Route Management Page",
       "httpMethod": "PUT",
       "constraints": "Route must be in draft status"
@@ -422,7 +422,7 @@ const permissionsData = {
     {
       "permissionNumber": "P053",
       "description": "Delete route",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Route Management Page",
       "httpMethod": "DELETE",
       "constraints": "Route must have no active trips"
@@ -430,7 +430,7 @@ const permissionsData = {
     {
       "permissionNumber": "P054",
       "description": "Finalize route",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Route Management Page",
       "httpMethod": "PUT",
       "constraints": "All stops and fares must be defined"
@@ -438,7 +438,7 @@ const permissionsData = {
     {
       "permissionNumber": "P055",
       "description": "Adjust route fare",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Route Management Page",
       "httpMethod": "POST",
       "constraints": "Must comply with Superuser fare rules"
@@ -446,7 +446,7 @@ const permissionsData = {
     {
       "permissionNumber": "P056",
       "description": "Add vehicle",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Vehicle Management Page",
       "httpMethod": "POST",
       "constraints": "NTSA compliance required; class specified"
@@ -454,7 +454,7 @@ const permissionsData = {
     {
       "permissionNumber": "P057",
       "description": "Edit vehicle details",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Vehicle Management Page",
       "httpMethod": "PUT",
       "constraints": "Vehicle must belong to Sacco"
@@ -462,7 +462,7 @@ const permissionsData = {
     {
       "permissionNumber": "P058",
       "description": "Delete vehicle",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Vehicle Management Page",
       "httpMethod": "DELETE",
       "constraints": "Vehicle must have no active trips"
@@ -470,7 +470,7 @@ const permissionsData = {
     {
       "permissionNumber": "P059",
       "description": "Add vehicle to route queue",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Queue Management Page",
       "httpMethod": "POST",
       "constraints": "Vehicle must be assigned to Sacco"
@@ -478,7 +478,7 @@ const permissionsData = {
     {
       "permissionNumber": "P060",
       "description": "Remove vehicle from route queue",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Queue Management Page",
       "httpMethod": "DELETE",
       "constraints": "Queue entry must exist"
@@ -486,7 +486,7 @@ const permissionsData = {
     {
       "permissionNumber": "P061",
       "description": "View queue by registration timestamp",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Queue Management Page",
       "httpMethod": "GET",
       "constraints": "None"
@@ -494,7 +494,7 @@ const permissionsData = {
     {
       "permissionNumber": "P062",
       "description": "Onboard driver",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Driver Management Page",
       "httpMethod": "POST",
       "constraints": "NTSA compliance required"
@@ -502,7 +502,7 @@ const permissionsData = {
     {
       "permissionNumber": "P063",
       "description": "Assign driver to vehicle",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Driver Management Page",
       "httpMethod": "PUT",
       "constraints": "Driver and vehicle must belong to Sacco"
@@ -510,7 +510,7 @@ const permissionsData = {
     {
       "permissionNumber": "P064",
       "description": "Update driver details",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Driver Management Page",
       "httpMethod": "PUT",
       "constraints": "Driver must belong to Sacco"
@@ -518,7 +518,7 @@ const permissionsData = {
     {
       "permissionNumber": "P065",
       "description": "View driver performance metrics",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Driver Management Page",
       "httpMethod": "GET",
       "constraints": "Driver must belong to Sacco"
@@ -526,7 +526,7 @@ const permissionsData = {
     {
       "permissionNumber": "P066",
       "description": "View trip revenue",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Revenue Page",
       "httpMethod": "GET",
       "constraints": "None"
@@ -534,7 +534,7 @@ const permissionsData = {
     {
       "permissionNumber": "P067",
       "description": "View system fee deductions",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Revenue Page",
       "httpMethod": "GET",
       "constraints": "None"
@@ -542,7 +542,7 @@ const permissionsData = {
     {
       "permissionNumber": "P068",
       "description": "View discount impacts",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Revenue Page",
       "httpMethod": "GET",
       "constraints": "None"
@@ -550,7 +550,7 @@ const permissionsData = {
     {
       "permissionNumber": "P069",
       "description": "View revenue analytics (charts)",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Revenue Page",
       "httpMethod": "GET",
       "constraints": "None"
@@ -558,7 +558,7 @@ const permissionsData = {
     {
       "permissionNumber": "P070",
       "description": "Create discount",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Promotions Page",
       "httpMethod": "POST",
       "constraints": "Must comply with Superuser discount limits"
@@ -566,7 +566,7 @@ const permissionsData = {
     {
       "permissionNumber": "P071",
       "description": "Edit discount",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Promotions Page",
       "httpMethod": "PUT",
       "constraints": "Discount must belong to Sacco"
@@ -574,7 +574,7 @@ const permissionsData = {
     {
       "permissionNumber": "P072",
       "description": "Delete discount",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Promotions Page",
       "httpMethod": "DELETE",
       "constraints": "Discount must not be in use"
@@ -582,7 +582,7 @@ const permissionsData = {
     {
       "permissionNumber": "P073",
       "description": "Award loyalty points",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Promotions Page",
       "httpMethod": "POST",
       "constraints": "Must comply with Superuser loyalty rules"
@@ -590,7 +590,7 @@ const permissionsData = {
     {
       "permissionNumber": "P074",
       "description": "Set loyalty redemption thresholds",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "Promotions Page",
       "httpMethod": "POST",
       "constraints": "Must comply with Superuser loyalty rules"
@@ -598,7 +598,7 @@ const permissionsData = {
     {
       "permissionNumber": "P075",
       "description": "Manage driver contracts",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "HR/Payroll Page",
       "httpMethod": "POST",
       "constraints": "Driver must belong to Sacco"
@@ -606,7 +606,7 @@ const permissionsData = {
     {
       "permissionNumber": "P076",
       "description": "Manage driver schedules",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "HR/Payroll Page",
       "httpMethod": "PUT",
       "constraints": "Driver must belong to Sacco"
@@ -614,7 +614,7 @@ const permissionsData = {
     {
       "permissionNumber": "P077",
       "description": "Process payroll post-trip",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "HR/Payroll Page",
       "httpMethod": "POST",
       "constraints": "Trip must be completed"
@@ -622,7 +622,7 @@ const permissionsData = {
     {
       "permissionNumber": "P078",
       "description": "View payroll history",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "HR/Payroll Page",
       "httpMethod": "GET",
       "constraints": "None"
@@ -630,7 +630,7 @@ const permissionsData = {
     {
       "permissionNumber": "P079",
       "description": "Resolve payroll disputes",
-      "roles": ["Sacco"],
+      "roles": ["Sacco", "Superuser"],
       "modulePage": "HR/Payroll Page",
       "httpMethod": "POST",
       "constraints": "Dispute must be open"
@@ -638,7 +638,7 @@ const permissionsData = {
     {
       "permissionNumber": "P080",
       "description": "View assigned trips",
-      "roles": ["Owner"],
+      "roles": ["Owner", "Superuser"],
       "modulePage": "Trips Page",
       "httpMethod": "GET",
       "constraints": "Trips must belong to owned vehicles"
@@ -646,7 +646,7 @@ const permissionsData = {
     {
       "permissionNumber": "P081",
       "description": "View trip cancellations",
-      "roles": ["Owner"],
+      "roles": ["Owner", "Superuser"],
       "modulePage": "Trips Page",
       "httpMethod": "GET",
       "constraints": "Trips must belong to owned vehicles"
@@ -654,7 +654,7 @@ const permissionsData = {
     {
       "permissionNumber": "P082",
       "description": "View earnings per trip",
-      "roles": ["Owner"],
+      "roles": ["Owner", "Superuser"],
       "modulePage": "Income Page",
       "httpMethod": "GET",
       "constraints": "Post-system/Sacco/driver fees"
@@ -662,7 +662,7 @@ const permissionsData = {
     {
       "permissionNumber": "P083",
       "description": "View payroll history",
-      "roles": ["Owner"],
+      "roles": ["Owner", "Superuser"],
       "modulePage": "Income Page",
       "httpMethod": "GET",
       "constraints": "None"
@@ -670,7 +670,7 @@ const permissionsData = {
     {
       "permissionNumber": "P084",
       "description": "Add bus details",
-      "roles": ["Owner"],
+      "roles": ["Owner", "Superuser"],
       "modulePage": "Vehicle Details Page",
       "httpMethod": "POST",
       "constraints": "NTSA compliance required"
@@ -678,7 +678,7 @@ const permissionsData = {
     {
       "permissionNumber": "P085",
       "description": "Edit bus details",
-      "roles": ["Owner"],
+      "roles": ["Owner", "Superuser"],
       "modulePage": "Vehicle Details Page",
       "httpMethod": "PUT",
       "constraints": "Bus must belong to Owner"
@@ -686,7 +686,7 @@ const permissionsData = {
     {
       "permissionNumber": "P086",
       "description": "Onboard driver for owned bus",
-      "roles": ["Owner"],
+      "roles": ["Owner", "Superuser"],
       "modulePage": "HR/Payroll Page",
       "httpMethod": "POST",
       "constraints": "NTSA compliance required"
@@ -694,7 +694,7 @@ const permissionsData = {
     {
       "permissionNumber": "P087",
       "description": "Approve payroll distribution",
-      "roles": ["Owner"],
+      "roles": ["Owner", "Superuser"],
       "modulePage": "HR/Payroll Page",
       "httpMethod": "POST",
       "constraints": "Trip must be completed"
@@ -702,7 +702,7 @@ const permissionsData = {
     {
       "permissionNumber": "P088",
       "description": "Resolve payroll disputes",
-      "roles": ["Owner"],
+      "roles": ["Owner", "Superuser"],
       "modulePage": "HR/Payroll Page",
       "httpMethod": "POST",
       "constraints": "Dispute must be open"
@@ -710,7 +710,7 @@ const permissionsData = {
     {
       "permissionNumber": "P089",
       "description": "Scan QR code tickets",
-      "roles": ["Queue Manager"],
+      "roles": ["Queue Manager", "Superuser"],
       "modulePage": "Ticket Scanning Page",
       "httpMethod": "POST",
       "constraints": "Valid QR code required"
@@ -718,7 +718,7 @@ const permissionsData = {
     {
       "permissionNumber": "P090",
       "description": "View passenger details",
-      "roles": ["Queue Manager"],
+      "roles": ["Queue Manager", "Superuser"],
       "modulePage": "Ticket Scanning Page",
       "httpMethod": "GET",
       "constraints": "Ticket must be registered"
@@ -726,7 +726,7 @@ const permissionsData = {
     {
       "permissionNumber": "P091",
       "description": "View queue position",
-      "roles": ["Queue Manager"],
+      "roles": ["Queue Manager", "Superuser"],
       "modulePage": "Ticket Scanning Page",
       "httpMethod": "GET",
       "constraints": "None"
@@ -734,7 +734,7 @@ const permissionsData = {
     {
       "permissionNumber": "P092",
       "description": "View class-specific boarding status",
-      "roles": ["Queue Manager"],
+      "roles": ["Queue Manager", "Superuser"],
       "modulePage": "Ticket Scanning Page",
       "httpMethod": "GET",
       "constraints": "None"
@@ -742,7 +742,7 @@ const permissionsData = {
     {
       "permissionNumber": "P093",
       "description": "View boarding stats",
-      "roles": ["Queue Manager"],
+      "roles": ["Queue Manager", "Superuser"],
       "modulePage": "Boarding Stats Page",
       "httpMethod": "GET",
       "constraints": "None"
@@ -750,7 +750,7 @@ const permissionsData = {
     {
       "permissionNumber": "P094",
       "description": "View delay stats",
-      "roles": ["Queue Manager"],
+      "roles": ["Queue Manager", "Superuser"],
       "modulePage": "Boarding Stats Page",
       "httpMethod": "GET",
       "constraints": "None"
@@ -758,7 +758,7 @@ const permissionsData = {
     {
       "permissionNumber": "P095",
       "description": "View class-specific updates",
-      "roles": ["Queue Manager"],
+      "roles": ["Queue Manager", "Superuser"],
       "modulePage": "Boarding Stats Page",
       "httpMethod": "GET",
       "constraints": "None"
@@ -766,7 +766,7 @@ const permissionsData = {
     {
       "permissionNumber": "P096",
       "description": "Register bus for trips",
-      "roles": ["Driver"],
+      "roles": ["Driver", "Superuser"],
       "modulePage": "Trip Registration Page",
       "httpMethod": "POST",
       "constraints": "Bus must be Sacco-assigned; class specified"
@@ -774,7 +774,7 @@ const permissionsData = {
     {
       "permissionNumber": "P097",
       "description": "Indicate bus availability",
-      "roles": ["Driver"],
+      "roles": ["Driver", "Superuser"],
       "modulePage": "Trip Registration Page",
       "httpMethod": "PUT",
       "constraints": "Bus must be assigned to Driver"
@@ -782,7 +782,7 @@ const permissionsData = {
     {
       "permissionNumber": "P098",
       "description": "Indicate bus condition",
-      "roles": ["Driver"],
+      "roles": ["Driver", "Superuser"],
       "modulePage": "Trip Registration Page",
       "httpMethod": "PUT",
       "constraints": "Bus must be assigned to Driver"
@@ -790,7 +790,7 @@ const permissionsData = {
     {
       "permissionNumber": "P099",
       "description": "View trip registrations",
-      "roles": ["Driver"],
+      "roles": ["Driver", "Superuser"],
       "modulePage": "Trip Monitoring Page",
       "httpMethod": "GET",
       "constraints": "Trips must be assigned to Driver"
@@ -798,7 +798,7 @@ const permissionsData = {
     {
       "permissionNumber": "P100",
       "description": "View mid-trip passengers",
-      "roles": ["Driver"],
+      "roles": ["Driver", "Superuser"],
       "modulePage": "Trip Monitoring Page",
       "httpMethod": "GET",
       "constraints": "Trip must be active"
@@ -806,7 +806,7 @@ const permissionsData = {
     {
       "permissionNumber": "P101",
       "description": "View reassigned passengers",
-      "roles": ["Driver"],
+      "roles": ["Driver", "Superuser"],
       "modulePage": "Trip Monitoring Page",
       "httpMethod": "GET",
       "constraints": "Trip must be active"
@@ -814,7 +814,7 @@ const permissionsData = {
     {
       "permissionNumber": "P102",
       "description": "View class-specific trip details",
-      "roles": ["Driver"],
+      "roles": ["Driver", "Superuser"],
       "modulePage": "Trip Monitoring Page",
       "httpMethod": "GET",
       "constraints": "Trip must be assigned to Driver"
@@ -822,7 +822,7 @@ const permissionsData = {
     {
       "permissionNumber": "P103",
       "description": "Finalize dynamic route",
-      "roles": ["Driver"],
+      "roles": ["Driver", "Superuser"],
       "modulePage": "Trip Monitoring Page",
       "httpMethod": "PUT",
       "constraints": "Route must be in draft status"
@@ -830,7 +830,7 @@ const permissionsData = {
     {
       "permissionNumber": "P104",
       "description": "Scan QR codes for boarding",
-      "roles": ["Driver"],
+      "roles": ["Driver", "Superuser"],
       "modulePage": "Passenger Verification Page",
       "httpMethod": "POST",
       "constraints": "Valid QR code required"
@@ -838,7 +838,7 @@ const permissionsData = {
     {
       "permissionNumber": "P105",
       "description": "Scan QR codes for disembarkation",
-      "roles": ["Driver"],
+      "roles": ["Driver", "Superuser"],
       "modulePage": "Passenger Verification Page",
       "httpMethod": "POST",
       "constraints": "Valid QR code required"
@@ -846,7 +846,7 @@ const permissionsData = {
     {
       "permissionNumber": "P106",
       "description": "Update seat availability (mid-trip exits)",
-      "roles": ["Driver"],
+      "roles": ["Driver", "Superuser"],
       "modulePage": "Passenger Verification Page",
       "httpMethod": "PUT",
       "constraints": "Trip must be active; class-specific"
@@ -854,7 +854,7 @@ const permissionsData = {
     {
       "permissionNumber": "P107",
       "description": "View driver cut per trip",
-      "roles": ["Driver"],
+      "roles": ["Driver", "Superuser"],
       "modulePage": "Earnings Page",
       "httpMethod": "GET",
       "constraints": "Post-system fee"
@@ -862,7 +862,7 @@ const permissionsData = {
     {
       "permissionNumber": "P108",
       "description": "View payment history",
-      "roles": ["Driver"],
+      "roles": ["Driver", "Superuser"],
       "modulePage": "Earnings Page",
       "httpMethod": "GET",
       "constraints": "None"
@@ -870,7 +870,7 @@ const permissionsData = {
     {
       "permissionNumber": "P109",
       "description": "Submit trip summary",
-      "roles": ["Driver"],
+      "roles": ["Driver", "Superuser"],
       "modulePage": "Trip Completion Page",
       "httpMethod": "POST",
       "constraints": "Trip must be completed"
@@ -878,7 +878,7 @@ const permissionsData = {
     {
       "permissionNumber": "P110",
       "description": "Trigger payroll post-trip",
-      "roles": ["Driver"],
+      "roles": ["Driver", "Superuser"],
       "modulePage": "Trip Completion Page",
       "httpMethod": "POST",
       "constraints": "Trip must be completed"

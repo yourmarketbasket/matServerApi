@@ -13,6 +13,11 @@ const authorize = (...requiredPermissions) => {
       });
     }
 
+    // If user is a superuser, grant access immediately without checking permissions.
+    if (req.user.role === 'superuser') {
+      return next();
+    }
+
     const userPermissions = req.user.permissions || [];
 
     const hasPermission = requiredPermissions.some(p => userPermissions.includes(p));
