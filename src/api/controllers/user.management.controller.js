@@ -49,8 +49,14 @@ class UserManagementController {
   async addUserPermission(req, res, next) {
     try {
       const { id } = req.params;
-      const { permission } = req.body;
-      const user = await UserManagementService.addUserPermission(id, permission);
+      const { permission, permissions } = req.body;
+
+      if (!permission && !permissions) {
+        return next(new Error('Request body must contain either "permission" (string) or "permissions" (array of strings).'));
+      }
+
+      const permsToAdd = permissions || permission;
+      const user = await UserManagementService.addUserPermission(id, permsToAdd);
       res.status(200).json({ success: true, data: user });
     } catch (error) {
       next(error);

@@ -74,22 +74,33 @@ class UserManagementService {
   }
 
   /**
-   * @description Adds a permission to a user
-   * @param {string} userId - The ID of the user to update
-   * @param {string} permission - The permission to add
-   * @returns {Promise<object>} The updated user object
+   * @description Adds a permission or a list of permissions to a user.
+   * @param {string} userId - The ID of the user to update.
+   * @param {string|string[]} permissions - The permission or permissions to add.
+   * @returns {Promise<object>} The updated user object.
    */
-  async addUserPermission(userId, permission) {
+  async addUserPermission(userId, permissions) {
     const user = await User.findById(userId);
     if (!user) {
       throw new Error('User not found.');
     }
 
-    if (user.permissions.includes(permission)) {
-      throw new Error('User already has this permission.');
+    const permissionsToAdd = Array.isArray(permissions) ? permissions : [permissions];
+    const newPermissions = [];
+
+    for (const p of permissionsToAdd) {
+      // Avoid adding duplicates that are already on the user or in the current request
+      if (!user.permissions.includes(p) && !newPermissions.includes(p)) {
+        newPermissions.push(p);
+      }
     }
 
-    user.permissions.push(permission);
+    // If all provided permissions already exist on the user, no need to save.
+    if (newPermissions.length === 0) {
+      return user;
+    }
+
+    user.permissions.push(...newPermissions);
     await user.save();
     return user;
   }
