@@ -1,6 +1,6 @@
-// const jwt = require('jsonwebtoken');
-// const config = require('../../config');
-// const User = require('../models/user.model');
+const jwt = require('jsonwebtoken');
+const config = require('../../config');
+const User = require('../models/user.model');
 
 /**
  * @description Middleware to protect routes by verifying a JWT.
@@ -17,19 +17,20 @@ const protect = async (req, res, next) => {
   }
 
   if (!token) {
-    // In a real app, you'd send an encrypted response.
     return res.status(401).json({ success: false, message: 'Not authorized to access this route' });
   }
 
   try {
-    // In a real implementation:
-    // const decoded = jwt.verify(token, config.jwtSecret);
-    // req.user = await User.findById(decoded.id).select('-password');
+    // Verify token
+    const decoded = jwt.verify(token, config.jwtSecret);
 
-    console.log('Middleware: JWT protection enabled.');
-    // For now, attach a dummy user to the request object.
-    // The role can be changed to test RBAC.
-    req.user = { _id: 'dummyUserId', role: 'admin', permissions: ['P111'] };
+    // Attach user to the request object
+    req.user = await User.findById(decoded.id).select('-password');
+
+    if (!req.user) {
+        return res.status(401).json({ success: false, message: 'Not authorized, user not found' });
+    }
+
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
