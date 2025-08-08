@@ -5,10 +5,10 @@ const PermissionService = require('../services/permission.service');
  * @description Controller for permission operations
  */
 class PermissionController {
-  async createPermission(req, res, next) {
+  async createPermissions(req, res, next) {
     try {
-      const permission = await PermissionService.createPermission(req.body);
-      res.status(201).json({ success: true, data: permission });
+      const permissions = await PermissionService.createPermissions(req.body);
+      res.status(201).json({ success: true, data: permissions });
     } catch (error) {
       next(error);
     }

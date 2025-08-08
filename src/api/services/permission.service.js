@@ -6,13 +6,14 @@ const Permission = require('../models/permission.model');
  */
 class PermissionService {
   /**
-   * @description Creates a new permission
-   * @param {object} permissionData - The data for the new permission
-   * @returns {Promise<object>} The new permission object
+   * @description Creates one or more new permissions.
+   * @param {object|object[]} permissionData - The data for the new permission(s). Can be a single object or an array of objects.
+   * @returns {Promise<object|object[]>} The created permission object or an array of created permission objects.
    */
-  async createPermission(permissionData) {
-    const permission = await Permission.create(permissionData);
-    return permission;
+  async createPermissions(permissionData) {
+    // Mongoose's create method handily accepts both a single object and an array of objects.
+    const permissions = await Permission.create(permissionData);
+    return permissions;
   }
 
   /**

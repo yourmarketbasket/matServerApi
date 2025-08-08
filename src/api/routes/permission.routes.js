@@ -8,7 +8,7 @@ const { authorize } = require('../middlewares/rbac.middleware');
 router.use(protect);
 
 // Routes for permissions
-router.post('/', authorize('P117'), PermissionController.createPermission);
+router.post('/', authorize('P117'), PermissionController.createPermissions);
 router.get('/', authorize('P118'), PermissionController.getPermissions);
 router.get('/:id', authorize('P119'), PermissionController.getPermissionById);
 router.put('/:id', authorize('P120'), PermissionController.updatePermission);
