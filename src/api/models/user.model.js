@@ -48,6 +48,7 @@ const UserSchema = new mongoose.Schema({
       'Team Lead',
       'Staff',
       'Intern',
+      'Ordinary',
     ],
     default: 'Staff',
   },

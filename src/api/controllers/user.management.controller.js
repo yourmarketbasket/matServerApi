@@ -17,6 +17,9 @@ class UserManagementController {
   async getUserById(req, res, next) {
     try {
       const { id } = req.params;
+      if (!id) {
+        return next(new Error('User ID is missing from the request URL.'));
+      }
       const user = await UserManagementService.getUserById(id);
       res.status(200).json({ success: true, data: user });
     } catch (error) {
@@ -27,6 +30,9 @@ class UserManagementController {
   async updateUserStatus(req, res, next) {
     try {
       const { id } = req.params;
+      if (!id) {
+        return next(new Error('User ID is missing from the request URL.'));
+      }
       const { status } = req.body;
       const user = await UserManagementService.updateUserStatus(id, status);
       res.status(200).json({ success: true, data: user });
@@ -38,6 +44,9 @@ class UserManagementController {
   async updateUserRank(req, res, next) {
     try {
       const { id } = req.params;
+      if (!id) {
+        return next(new Error('User ID is missing from the request URL.'));
+      }
       const { rank } = req.body;
       const user = await UserManagementService.updateUserRank(id, rank);
       res.status(200).json({ success: true, data: user });
@@ -49,6 +58,9 @@ class UserManagementController {
   async addUserPermission(req, res, next) {
     try {
       const { id } = req.params;
+      if (!id) {
+        return next(new Error('User ID is missing from the request URL.'));
+      }
       const { permission, permissions } = req.body;
 
       if (!permission && !permissions) {
@@ -66,6 +78,9 @@ class UserManagementController {
   async removeUserPermission(req, res, next) {
     try {
       const { id, permission } = req.params;
+      if (!id || !permission) {
+        return next(new Error('User ID or permission is missing from the request URL.'));
+      }
       const user = await UserManagementService.removeUserPermission(
         id,
         permission
