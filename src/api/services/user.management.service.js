@@ -30,6 +30,91 @@ class UserManagementService {
 
     return user;
   }
+
+  /**
+   * @description Get all users
+   * @returns {Promise<object[]>} A list of all users
+   */
+  async getUsers() {
+    const users = await User.find();
+    return users;
+  }
+
+  /**
+   * @description Get a single user by their ID
+   * @param {string} userId - The ID of the user to retrieve
+   * @returns {Promise<object>} The user object
+   */
+  async getUserById(userId) {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('User not found.');
+    }
+    return user;
+  }
+
+  /**
+   * @description Updates a user's rank
+   * @param {string} userId - The ID of the user to update
+   * @param {string} rank - The new rank
+   * @returns {Promise<object>} The updated user object
+   */
+  async updateUserRank(userId, rank) {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { rank },
+      { new: true, runValidators: true }
+    );
+
+    if (!user) {
+      throw new Error('User not found.');
+    }
+
+    return user;
+  }
+
+  /**
+   * @description Adds a permission to a user
+   * @param {string} userId - The ID of the user to update
+   * @param {string} permission - The permission to add
+   * @returns {Promise<object>} The updated user object
+   */
+  async addUserPermission(userId, permission) {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('User not found.');
+    }
+
+    if (user.permissions.includes(permission)) {
+      throw new Error('User already has this permission.');
+    }
+
+    user.permissions.push(permission);
+    await user.save();
+    return user;
+  }
+
+  /**
+   * @description Removes a permission from a user
+   * @param {string} userId - The ID of the user to update
+   * @param {string} permission - The permission to remove
+   * @returns {Promise<object>} The updated user object
+   */
+  async removeUserPermission(userId, permission) {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('User not found.');
+    }
+
+    const permissionIndex = user.permissions.indexOf(permission);
+    if (permissionIndex === -1) {
+      throw new Error('User does not have this permission.');
+    }
+
+    user.permissions.splice(permissionIndex, 1);
+    await user.save();
+    return user;
+  }
 }
 
 module.exports = new UserManagementService();

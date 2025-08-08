@@ -29,6 +29,7 @@ const analyticsRoutes = require('./api/routes/analytics.routes');
 const discountRoutes = require('./api/routes/discount.routes');
 const loyaltyRoutes = require('./api/routes/loyalty.routes');
 const userManagementRoutes = require('./api/routes/user.management.routes');
+const permissionRoutes = require('./api/routes/permission.routes');
 
 // Connect to MongoDB
 connectDB();
@@ -83,6 +84,7 @@ app.use(`${apiPrefix}/analytics`, analyticsRoutes);
 app.use(`${apiPrefix}/discounts`, discountRoutes);
 app.use(`${apiPrefix}/loyalty`, loyaltyRoutes);
 app.use(`${apiPrefix}/users`, userManagementRoutes);
+app.use(`${apiPrefix}/permissions`, permissionRoutes);
 
 // --- Temporary Email Test Route ---
 const NotificationService = require('./api/services/notification.service');

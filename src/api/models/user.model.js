@@ -34,6 +34,23 @@ const UserSchema = new mongoose.Schema({
     enum: ['passenger', 'sacco', 'owner', 'queue_manager', 'driver', 'support_staff', 'admin', 'superuser'],
     required: true,
   },
+  rank: {
+    type: String,
+    enum: [
+      'CEO',
+      'CFO',
+      'COO',
+      'CTO',
+      'VP',
+      'Director',
+      'Manager',
+      'Supervisor',
+      'Team Lead',
+      'Staff',
+      'Intern',
+    ],
+    default: 'Staff',
+  },
   avatar: {
     type: String,
   },
