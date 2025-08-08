@@ -10,8 +10,8 @@ router.use(protect);
 // Routes for permissions
 router.post('/', authorize('P117'), PermissionController.createPermissions);
 router.get('/', authorize('P118'), PermissionController.getPermissions);
-router.get('/:id', authorize('P119'), PermissionController.getPermissionById);
-router.put('/:id', authorize('P120'), PermissionController.updatePermission);
-router.delete('/:id', authorize('P121'), PermissionController.deletePermission);
+router.get('/:permissionNumber', authorize('P119'), PermissionController.getPermissionByNumber);
+router.put('/:permissionNumber', authorize('P120'), PermissionController.updatePermissionByNumber);
+router.delete('/:permissionNumber', authorize('P121'), PermissionController.deletePermissionByNumber);
 
 module.exports = router;

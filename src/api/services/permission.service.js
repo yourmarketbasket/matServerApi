@@ -7,11 +7,10 @@ const Permission = require('../models/permission.model');
 class PermissionService {
   /**
    * @description Creates one or more new permissions.
-   * @param {object|object[]} permissionData - The data for the new permission(s). Can be a single object or an array of objects.
-   * @returns {Promise<object|object[]>} The created permission object or an array of created permission objects.
+   * @param {object|object[]} permissionData - The data for the new permission(s).
+   * @returns {Promise<object|object[]>} The created permission(s).
    */
   async createPermissions(permissionData) {
-    // Mongoose's create method handily accepts both a single object and an array of objects.
     const permissions = await Permission.create(permissionData);
     return permissions;
   }
@@ -26,12 +25,12 @@ class PermissionService {
   }
 
   /**
-   * @description Get a single permission by its ID
-   * @param {string} permissionId - The ID of the permission to retrieve
+   * @description Get a single permission by its permission number
+   * @param {string} permissionNumber - The permission number to retrieve (e.g., "P001")
    * @returns {Promise<object>} The permission object
    */
-  async getPermissionById(permissionId) {
-    const permission = await Permission.findById(permissionId);
+  async getPermissionByNumber(permissionNumber) {
+    const permission = await Permission.findOne({ permissionNumber: permissionNumber });
     if (!permission) {
       throw new Error('Permission not found.');
     }
@@ -39,14 +38,14 @@ class PermissionService {
   }
 
   /**
-   * @description Updates a permission
-   * @param {string} permissionId - The ID of the permission to update
+   * @description Updates a permission by its permission number
+   * @param {string} permissionNumber - The permission number to update
    * @param {object} permissionData - The new data for the permission
    * @returns {Promise<object>} The updated permission object
    */
-  async updatePermission(permissionId, permissionData) {
-    const permission = await Permission.findByIdAndUpdate(
-      permissionId,
+  async updatePermissionByNumber(permissionNumber, permissionData) {
+    const permission = await Permission.findOneAndUpdate(
+      { permissionNumber: permissionNumber },
       permissionData,
       { new: true, runValidators: true }
     );
@@ -59,12 +58,12 @@ class PermissionService {
   }
 
   /**
-   * @description Deletes a permission
-   * @param {string} permissionId - The ID of the permission to delete
+   * @description Deletes a permission by its permission number
+   * @param {string} permissionNumber - The permission number to delete
    * @returns {Promise<object>} A confirmation message
    */
-  async deletePermission(permissionId) {
-    const permission = await Permission.findByIdAndDelete(permissionId);
+  async deletePermissionByNumber(permissionNumber) {
+    const permission = await Permission.findOneAndDelete({ permissionNumber: permissionNumber });
 
     if (!permission) {
       throw new Error('Permission not found.');

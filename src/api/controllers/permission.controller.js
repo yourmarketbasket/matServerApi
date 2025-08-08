@@ -23,30 +23,30 @@ class PermissionController {
     }
   }
 
-  async getPermissionById(req, res, next) {
+  async getPermissionByNumber(req, res, next) {
     try {
-      const { id } = req.params;
-      const permission = await PermissionService.getPermissionById(id);
+      const { permissionNumber } = req.params;
+      const permission = await PermissionService.getPermissionByNumber(permissionNumber);
       res.status(200).json({ success: true, data: permission });
     } catch (error) {
       next(error);
     }
   }
 
-  async updatePermission(req, res, next) {
+  async updatePermissionByNumber(req, res, next) {
     try {
-      const { id } = req.params;
-      const permission = await PermissionService.updatePermission(id, req.body);
+      const { permissionNumber } = req.params;
+      const permission = await PermissionService.updatePermissionByNumber(permissionNumber, req.body);
       res.status(200).json({ success: true, data: permission });
     } catch (error) {
       next(error);
     }
   }
 
-  async deletePermission(req, res, next) {
+  async deletePermissionByNumber(req, res, next) {
     try {
-      const { id } = req.params;
-      await PermissionService.deletePermission(id);
+      const { permissionNumber } = req.params;
+      await PermissionService.deletePermissionByNumber(permissionNumber);
       res.status(200).json({ success: true, data: {} });
     } catch (error) {
       next(error);
