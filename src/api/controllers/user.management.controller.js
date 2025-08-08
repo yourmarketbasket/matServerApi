@@ -13,7 +13,7 @@ class UserManagementController {
       next(error);
     }
   }
-
+// force
   async getUserById(req, res, next) {
     try {
       const { id } = req.params;
