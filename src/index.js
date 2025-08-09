@@ -32,6 +32,7 @@ const permissionRoutes = require('./api/routes/permission.routes');
 const userManagementRoutes = require('./api/routes/user.management.routes');
 const teamRoutes = require('./api/routes/team.routes');
 const supportGroupRoutes = require('./api/routes/supportGroup.routes');
+const busOperatorRoutes = require('./api/routes/busOperator.routes');
 
 // Connect to MongoDB
 connectDB();
@@ -89,6 +90,7 @@ app.use(`${apiPrefix}/permissions`, permissionRoutes);
 app.use(`${apiPrefix}/users`, userManagementRoutes);
 app.use(`${apiPrefix}/teams`, teamRoutes);
 app.use(`${apiPrefix}/support-groups`, supportGroupRoutes);
+app.use(`${apiPrefix}/bus-operators`, busOperatorRoutes);
 
 // --- Temporary Email Test Route ---
 const NotificationService = require('./api/services/notification.service');

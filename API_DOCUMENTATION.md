@@ -479,6 +479,92 @@ This API is for managing support tickets.
 
 ---
 
+## Bus Operator Management API
+
+**Base Path:** `/api/v1/bus-operators`
+
+This API is for managing bus operators.
+
+### 1. Register a new bus operator
+
+*   **Endpoint:** `POST /api/v1/bus-operators`
+*   **Description:** Registers a new bus operator.
+*   **Authentication:** Required (Bearer Token). Requires `admin` or `superuser` role.
+*   **Request Body:**
+    ```json
+    {
+      "name": "Super Coaches",
+      "type": "sacco",
+      "contact": {
+        "phone": "1234567890",
+        "email": "contact@supercoaches.com"
+      },
+      "documentation": [
+        "http://example.com/doc1.pdf",
+        "http://example.com/doc2.pdf"
+      ]
+    }
+    ```
+*   **Success Response (201 Created):** Returns the created bus operator object.
+
+### 2. Get all bus operators
+
+*   **Endpoint:** `GET /api/v1/bus-operators`
+*   **Description:** Retrieves a list of all bus operators.
+*   **Authentication:** Required (Bearer Token). Requires `admin` or `superuser` role.
+*   **Success Response (200 OK):** Returns an array of all bus operator objects.
+
+### 3. Get bus operator by ID
+
+*   **Endpoint:** `GET /api/v1/bus-operators/:id`
+*   **Description:** Retrieves a single bus operator by its unique database `_id`.
+*   **Authentication:** Required (Bearer Token). Requires `admin` or `superuser` role.
+*   **URL Parameters:**
+    *   `id` (string, required): The `_id` of the bus operator.
+*   **Success Response (200 OK):** Returns the requested bus operator object.
+
+### 4. Update a bus operator's status
+
+*   **Endpoint:** `PUT /api/v1/bus-operators/:id/status`
+*   **Description:** Updates the status of a bus operator (e.g., to 'approved' or 'rejected').
+*   **Authentication:** Required (Bearer Token). Requires `admin` or `superuser` role.
+*   **URL Parameters:**
+    *   `id` (string, required): The `_id` of the bus operator to update.
+*   **Request Body:**
+    ```json
+    {
+      "status": "approved"
+    }
+    ```
+*   **Success Response (200 OK):** Returns the full, updated bus operator object.
+
+### 5. Update a bus operator
+
+*   **Endpoint:** `PUT /api/v1/bus-operators/:id`
+*   **Description:** Updates an existing bus operator by its `_id`.
+*   **Authentication:** Required (Bearer Token). Requires `admin` or `superuser` role.
+*   **URL Parameters:**
+    *   `id` (string, required): The `_id` of the bus operator to update.
+*   **Request Body:** An object containing the fields to update.
+*   **Success Response (200 OK):** Returns the full, updated bus operator object.
+
+### 6. Delete a bus operator
+
+*   **Endpoint:** `DELETE /api/v1/bus-operators/:id`
+*   **Description:** Deletes a bus operator from the system by its `_id`.
+*   **Authentication:** Required (Bearer Token). Requires `admin` or `superuser` role.
+*   **URL Parameters:**
+    *   `id` (string, required): The `_id` of the bus operator to delete.
+*   **Success Response (200 OK):**
+    ```json
+    {
+      "success": true,
+      "data": {}
+    }
+    ```
+
+---
+
 ## Analytics API
 
 **Base Path:** `/api/v1/analytics`
