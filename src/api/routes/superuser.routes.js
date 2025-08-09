@@ -10,6 +10,8 @@ const { authorize } = require('../middlewares/rbac.middleware');
 router.post('/register', SuperuserController.registerSuperuser);
 router.post('/login', SuperuserController.loginSuperuser);
 
+// force --- IGNORE ---
+
 // All subsequent routes are protected
 router.use(protect);
 
