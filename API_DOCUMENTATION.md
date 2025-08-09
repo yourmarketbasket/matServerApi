@@ -404,6 +404,81 @@ This API is for managing support groups.
 
 ---
 
+## Support Ticket Management API
+
+**Base Path:** `/api/v1/support`
+
+This API is for managing support tickets.
+
+### 1. Create a new support ticket
+
+*   **Endpoint:** `POST /api/v1/support`
+*   **Description:** Creates a new support ticket.
+*   **Authentication:** Required (Bearer Token). Requires `passenger`, `driver`, `support_staff`, `admin`, or `superuser` role.
+*   **Request Body:**
+    ```json
+    {
+      "title": "Issue with my last trip",
+      "description": "The driver was rude and the bus was dirty.",
+      "category": "general_inquiry",
+      "priority": "medium",
+      "ticketId": "60d0fe4f5311236168a109ca"
+    }
+    ```
+*   **Success Response (201 Created):** Returns the created support ticket object.
+
+### 2. Get all support tickets
+
+*   **Endpoint:** `GET /api/v1/support`
+*   **Description:** Retrieves a list of all support tickets. If the user is a passenger or driver, it only returns their own tickets. If the user is a support staff, admin, or superuser, it returns all tickets.
+*   **Authentication:** Required (Bearer Token).
+*   **Success Response (200 OK):** Returns an array of all support ticket objects.
+
+### 3. Get support ticket by ID
+
+*   **Endpoint:** `GET /api/v1/support/:id`
+*   **Description:** Retrieves a single support ticket by its unique database `_id`.
+*   **Authentication:** Required (Bearer Token).
+*   **URL Parameters:**
+    *   `id` (string, required): The `_id` of the support ticket.
+*   **Success Response (200 OK):** Returns the requested support ticket object.
+
+### 4. Update a support ticket
+
+*   **Endpoint:** `PUT /api/v1/support/:id`
+*   **Description:** Updates an existing support ticket by its `_id`.
+*   **Authentication:** Required (Bearer Token). Requires `support_staff`, `admin`, or `superuser` role.
+*   **URL Parameters:**
+    *   `id` (string, required): The `_id` of the support ticket to update.
+*   **Request Body:** An object containing the fields to update (e.g., `status`, `priority`, `assignedTo`, `resolutionDetails`).
+*   **Success Response (200 OK):** Returns the full, updated support ticket object.
+
+### 5. Delete a support ticket
+
+*   **Endpoint:** `DELETE /api/v1/support/:id`
+*   **Description:** Deletes a support ticket from the system by its `_id`.
+*   **Authentication:** Required (Bearer Token). Requires `superuser` role.
+*   **URL Parameters:**
+    *   `id` (string, required): The `_id` of the support ticket to delete.
+*   **Success Response (200 OK):**
+    ```json
+    {
+      "success": true,
+      "data": {}
+    }
+    ```
+
+### 6. Escalate a support ticket
+
+*   **Endpoint:** `POST /api/v1/support/:id/escalate`
+*   **Description:** Escalates a support ticket.
+*   **Authentication:** Required (Bearer Token). Requires `support_staff`, `admin`, or `superuser` role.
+*   **URL Parameters:**
+    *   `id` (string, required): The `_id` of the support ticket to escalate.
+*   **Success Response (200 OK):** Returns the updated support ticket object.
+
+---
+
 ## Analytics API
 
 **Base Path:** `/api/v1/analytics`

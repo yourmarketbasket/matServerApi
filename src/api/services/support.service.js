@@ -1,62 +1,89 @@
-// The specification mentions 'Inquiry' and 'Escalation' but does not define models for them.
-// For this service, we will assume the 'Dispute' model can be used for inquiries,
-// or that specific models would be created later.
-
 const Dispute = require('../models/dispute.model');
 
 /**
  * @class SupportService
- * @description Manages support inquiries and escalations
+ * @description Manages support tickets (disputes) and escalations
  */
 class SupportService {
   /**
-   * @description Creates a new support inquiry
-   * @param {object} inquiryData - The data for the new inquiry
+   * @description Creates a new support ticket
+   * @param {object} ticketData - The data for the new ticket
    * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async createInquiry(inquiryData, io) {
-    const inquiry = await Dispute.create(inquiryData);
+  async createTicket(ticketData, io) {
+    const ticket = await Dispute.create(ticketData);
     // Notify support staff room
-    io.to('support_staff').emit('newInquiry', { inquiry });
-    return { inquiry };
+    io.to('support_staff').emit('newTicket', { ticket });
+    return ticket;
   }
 
   /**
-   * @description Resolves an existing inquiry
-   * @param {string} id - The ID of the inquiry to resolve
-   * @param {string} resolution - The details of the resolution
-   * @param {object} io - The Socket.IO instance
-   * @returns {Promise<object>}
+   * @description Get tickets based on user role
+   * @param {object} user - The user object
+   * @returns {Promise<object[]>} A list of tickets
    */
-  async resolveInquiry(id, resolution, io) {
-    const inquiry = await Dispute.findByIdAndUpdate(id, { status: 'resolved', resolutionDetails: resolution }, { new: true });
-    io.to('support_staff').emit('inquiryResolved', { inquiry });
-    return { inquiry };
+  async getTickets(user) {
+    if (user.role === 'support_staff' || user.role === 'admin' || user.role === 'superuser') {
+      return await Dispute.find().populate('raisedBy', 'name email');
+    }
+    return await Dispute.find({ raisedBy: user._id }).populate('raisedBy', 'name email');
   }
 
   /**
-   * @description Escalates an inquiry to a higher level
-   * @param {string} id - The ID of the inquiry to escalate
-   * @param {string} details - The details for the escalation
+   * @description Get a single ticket by its ID
+   * @param {string} ticketId - The ID of the ticket to retrieve
+   * @returns {Promise<object>} The ticket object
+   */
+  async getTicketById(ticketId) {
+    const ticket = await Dispute.findById(ticketId).populate('raisedBy', 'name email').populate('assignedTo', 'name email');
+    if (!ticket) {
+      throw new Error('Ticket not found.');
+    }
+    return ticket;
+  }
+
+  /**
+   * @description Updates a ticket
+   * @param {string} ticketId - The ID of the ticket to update
+   * @param {object} updateData - The data to update
+   * @returns {Promise<object>} The updated ticket object
+   */
+  async updateTicket(ticketId, updateData) {
+    const ticket = await Dispute.findByIdAndUpdate(ticketId, updateData, {
+      new: true,
+      runValidators: true,
+    });
+    if (!ticket) {
+      throw new Error('Ticket not found.');
+    }
+    return ticket;
+  }
+
+  /**
+   * @description Deletes a ticket
+   * @param {string} ticketId - The ID of the ticket to delete
+   * @returns {Promise<object>}
+   */
+  async deleteTicket(ticketId) {
+    const ticket = await Dispute.findByIdAndDelete(ticketId);
+    if (!ticket) {
+      throw new Error('Ticket not found.');
+    }
+    return ticket;
+  }
+
+  /**
+   * @description Escalates a ticket to a higher level
+   * @param {string} ticketId - The ID of the ticket to escalate
    * @param {object} io - The Socket.IO instance
    * @returns {Promise<object>}
    */
-  async escalateInquiry(id, details, io) {
-    const inquiry = await Dispute.findByIdAndUpdate(id, { status: 'escalated' }, { new: true });
+  async escalateTicket(ticketId, io) {
+    const ticket = await Dispute.findByIdAndUpdate(ticketId, { status: 'escalated' }, { new: true });
     // Notify admin room
-    io.to('admins').emit('inquiryEscalated', { inquiry, details });
-    return { inquiry };
-  }
-
-  /**
-   * @description Retrieves system-wide alerts
-   * @returns {Promise<Array<object>>}
-   */
-  async getSystemAlerts() {
-    console.log('Fetching system alerts');
-    // TODO: Implement logic to detect system-wide issues (e.g., high failure rates)
-    return { alerts: [{ type: 'HighCancellationRate', routeId: 'route123', details: 'Cancellation rate over 20%' }] };
+    io.to('admins').emit('ticketEscalated', { ticket });
+    return ticket;
   }
 }
 

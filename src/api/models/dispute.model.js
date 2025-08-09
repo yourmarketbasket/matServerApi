@@ -1,21 +1,28 @@
 const mongoose = require('mongoose');
 
 const DisputeSchema = new mongoose.Schema({
-  ticketId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Ticket',
-  },
-  payrollId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Payroll',
+  title: {
+    type: String,
+    required: [true, 'Please provide a title for the ticket'],
+    trim: true,
   },
   description: {
     type: String,
     required: [true, 'Please provide a description of the dispute'],
   },
+  category: {
+    type: String,
+    enum: ['cancellation', 'reallocation', 'system_error', 'payment', 'general_inquiry'],
+    required: [true, 'Please specify a category for the ticket'],
+  },
+  priority: {
+    type: String,
+    enum: ['low', 'medium', 'high'],
+    default: 'medium',
+  },
   status: {
     type: String,
-    enum: ['open', 'escalated', 'resolved'],
+    enum: ['open', 'in-progress', 'escalated', 'resolved', 'closed'],
     default: 'open',
   },
   raisedBy: {
@@ -23,9 +30,21 @@ const DisputeSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  assignedTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
   resolvedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+  },
+  ticketId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Ticket',
+  },
+  payrollId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Payroll',
   },
   createdAt: {
     type: Date,
@@ -36,17 +55,6 @@ const DisputeSchema = new mongoose.Schema({
   },
   resolutionDetails: {
       type: String,
-  }
-});
-
-// Ensure that either ticketId or payrollId is provided, but not both.
-DisputeSchema.pre('validate', function(next) {
-  if (!this.ticketId && !this.payrollId) {
-    next(new Error('Dispute must be linked to either a ticket or a payroll.'));
-  } else if (this.ticketId && this.payrollId) {
-    next(new Error('Dispute cannot be linked to both a ticket and a payroll.'));
-  } else {
-    next();
   }
 });
 

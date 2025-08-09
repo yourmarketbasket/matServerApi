@@ -8,13 +8,14 @@ const { authorize } = require('../middlewares/rbac.middleware');
 router.use(protect);
 
 const isSupportAdmin = authorize('support_staff', 'admin', 'superuser');
+const canCreateTicket = authorize('passenger', 'driver', 'support_staff', 'admin', 'superuser');
 
-// Any authenticated user can create an inquiry
-router.post('/inquiries', SupportController.createInquiry);
-
-// Only support staff and admins can manage inquiries and escalations
-router.get('/inquiries', isSupportAdmin, SupportController.getInquiries);
-router.put('/inquiries/:id', isSupportAdmin, SupportController.updateInquiry);
-router.post('/escalations', isSupportAdmin, SupportController.createEscalation);
+// Routes for support tickets
+router.post('/', canCreateTicket, SupportController.createTicket);
+router.get('/', SupportController.getTickets);
+router.get('/:id', SupportController.getTicketById);
+router.put('/:id', isSupportAdmin, SupportController.updateTicket);
+router.delete('/:id', authorize('superuser'), SupportController.deleteTicket); // Only superuser can delete tickets
+router.post('/:id/escalate', isSupportAdmin, SupportController.escalateTicket);
 
 module.exports = router;
