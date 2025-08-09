@@ -9,6 +9,7 @@ router.use(protect);
 
 // Define User Management Routes
 router.get('/', authorize('P112'), UserManagementController.getUsers);
+router.get('/admins', authorize('P112'), UserManagementController.getAdminUsers);
 router.get('/:id', authorize('P113'), UserManagementController.getUserById);
 router.put('/:id/status', authorize('P111'), UserManagementController.updateUserStatus);
 router.put('/:id/rank', authorize('P114'), UserManagementController.updateUserRank);

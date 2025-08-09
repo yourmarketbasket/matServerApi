@@ -1,4 +1,4 @@
-// const AnalyticsService = require('../services/analytics.service');
+const AnalyticsService = require('../services/analytics.service');
 
 /**
  * @class AnalyticsController
@@ -7,10 +7,10 @@
 class AnalyticsController {
   async getSaccoRevenue(req, res, next) {
     try {
-      // const { saccoId } = req.params;
-      // const { startDate, endDate } = req.query;
-      // const result = await AnalyticsService.calculateRevenueBySacco(saccoId, startDate, endDate);
-      res.status(200).json({ success: true, data: { revenue: 'sacco-revenue' } });
+      const { saccoId } = req.params;
+      const { startDate, endDate } = req.query;
+      const result = await AnalyticsService.calculateRevenueBySacco(saccoId, startDate, endDate);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -18,10 +18,10 @@ class AnalyticsController {
 
   async getOwnerRevenue(req, res, next) {
     try {
-      // const { ownerId } = req.params;
-      // const { startDate, endDate } = req.query;
-      // const result = await AnalyticsService.calculateRevenueByOwner(ownerId, startDate, endDate);
-      res.status(200).json({ success: true, data: { revenue: 'owner-revenue' } });
+      const { ownerId } = req.params;
+      const { startDate, endDate } = req.query;
+      const result = await AnalyticsService.calculateRevenueByOwner(ownerId, startDate, endDate);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -29,9 +29,9 @@ class AnalyticsController {
 
   async getCancellationStats(req, res, next) {
     try {
-      // const { routeId } = req.params;
-      // const result = await AnalyticsService.calculateCancellationStats(routeId);
-      res.status(200).json({ success: true, data: { stats: 'cancellation-stats' } });
+      const { routeId } = req.params;
+      const result = await AnalyticsService.calculateCancellationStats(routeId);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -39,9 +39,9 @@ class AnalyticsController {
 
   async getPayrollAccuracy(req, res, next) {
     try {
-      // const { saccoId } = req.params;
-      // const result = await AnalyticsService.calculatePayrollAccuracy(saccoId);
-      res.status(200).json({ success: true, data: { accuracy: 'payroll-accuracy' } });
+      const { saccoId } = req.params;
+      const result = await AnalyticsService.calculatePayrollAccuracy(saccoId);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -49,9 +49,19 @@ class AnalyticsController {
 
   async getLoyaltyUsage(req, res, next) {
     try {
-      // const { userId } = req.params;
-      // const result = await AnalyticsService.calculateLoyaltyUsage(userId);
-      res.status(200).json({ success: true, data: { usage: 'loyalty-usage' } });
+      const { userId } = req.params;
+      const result = await AnalyticsService.calculateLoyaltyUsage(userId);
+      res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getUserRegistrationStats(req, res, next) {
+    try {
+      const { period } = req.query;
+      const result = await AnalyticsService.getUserRegistrationStats(period);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }

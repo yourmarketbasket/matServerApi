@@ -85,6 +85,15 @@ class UserManagementController {
       next(error);
     }
   }
+
+  async getAdminUsers(req, res, next) {
+    try {
+      const users = await UserManagementService.getAdminUsers();
+      res.status(200).json({ success: true, data: users });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 // force --- IGNORE ---
 

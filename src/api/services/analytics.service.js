@@ -1,3 +1,6 @@
+const User = require('../models/user.model');
+const AuditLog = require('../models/auditLog.model');
+
 // This service would perform complex database aggregation queries.
 
 /**
@@ -62,6 +65,50 @@ class AnalyticsService {
     console.log(`Calculating loyalty usage for user ${userId}`);
     // TODO: Aggregate data from the Loyalty collection for a given user
     return { usage: { totalPointsEarned: 5000, totalPointsRedeemed: 1200, currentBalance: 3800 } };
+  }
+
+  /**
+   * @description Get user registration statistics for a given period
+   * @param {string} period - The period for which to get stats ('daily', 'weekly', 'monthly')
+   * @returns {Promise<object>}
+   */
+  async getUserRegistrationStats(period) {
+    const now = new Date();
+    let startDate;
+
+    switch (period) {
+      case 'daily':
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        break;
+      case 'weekly':
+        startDate = new Date(now.setDate(now.getDate() - now.getDay()));
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case 'monthly':
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      default:
+        throw new Error('Invalid period specified. Use "daily", "weekly", or "monthly".');
+    }
+
+    const stats = await User.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate },
+        },
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+    ]);
+
+    return stats;
   }
 }
 

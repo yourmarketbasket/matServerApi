@@ -23,5 +23,6 @@ router.get('/revenue/owner/:ownerId', canViewOwnerAnalytics, AnalyticsController
 router.get('/cancellations/:routeId', canViewSaccoAnalytics, AnalyticsController.getCancellationStats);
 router.get('/payroll/:saccoId', canViewSaccoAnalytics, AnalyticsController.getPayrollAccuracy);
 router.get('/loyalty/:userId', canViewOwnLoyalty, AnalyticsController.getLoyaltyUsage);
+router.get('/registrations', authorize('admin', 'superuser'), AnalyticsController.getUserRegistrationStats);
 
 module.exports = router;

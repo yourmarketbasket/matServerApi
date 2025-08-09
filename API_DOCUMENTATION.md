@@ -41,7 +41,28 @@ This API is for managing users, their status, rank, and permissions.
     }
     ```
 
-### 2. Get User by ID
+### 2. Get Admin Users
+
+*   **Endpoint:** `GET /api/v1/users/admins`
+*   **Description:** Retrieves a list of all admin users in the system.
+*   **Authorization:** Requires permission `P112`.
+*   **Success Response (200 OK):**
+    ```json
+    {
+      "success": true,
+      "data": [
+        {
+          "_id": "60d0fe4f5311236168a109ca",
+          "name": "Jane Doe",
+          "email": "jane.doe@example.com",
+          "role": "admin",
+          "rank": "Manager"
+        }
+      ]
+    }
+    ```
+
+### 3. Get User by ID
 
 *   **Endpoint:** `GET /api/v1/users/:id`
 *   **Description:** Retrieves a single user by their unique database `_id`.
@@ -215,3 +236,237 @@ This API is for managing the permission definitions themselves.
       "data": {}
     }
     ```
+
+---
+
+## Team Management API
+
+**Base Path:** `/api/v1/teams`
+
+This API is for managing teams.
+
+### 1. Create a new team
+
+*   **Endpoint:** `POST /api/v1/teams`
+*   **Description:** Creates a new team.
+*   **Authorization:** Requires permission `P122`.
+*   **Request Body:**
+    ```json
+    {
+      "name": "Team Alpha",
+      "teamLead": "60d0fe4f5311236168a109ca"
+    }
+    ```
+*   **Success Response (201 Created):** Returns the created team object.
+
+### 2. Get all teams
+
+*   **Endpoint:** `GET /api/v1/teams`
+*   **Description:** Retrieves a list of all teams.
+*   **Authorization:** Requires permission `P123`.
+*   **Success Response (200 OK):** Returns an array of all team objects.
+
+### 3. Get team by ID
+
+*   **Endpoint:** `GET /api/v1/teams/:id`
+*   **Description:** Retrieves a single team by its unique database `_id`.
+*   **Authorization:** Requires permission `P124`.
+*   **URL Parameters:**
+    *   `id` (string, required): The `_id` of the team.
+*   **Success Response (200 OK):** Returns the requested team object.
+
+### 4. Update a team
+
+*   **Endpoint:** `PUT /api/v1/teams/:id`
+*   **Description:** Updates an existing team by its `_id`.
+*   **Authorization:** Requires permission `P125`.
+*   **URL Parameters:**
+    *   `id` (string, required): The `_id` of the team to update.
+*   **Request Body:** An object containing the fields to update.
+*   **Success Response (200 OK):** Returns the full, updated team object.
+
+### 5. Delete a team
+
+*   **Endpoint:** `DELETE /api/v1/teams/:id`
+*   **Description:** Deletes a team from the system by its `_id`.
+*   **Authorization:** Requires permission `P126`.
+*   **URL Parameters:**
+    *   `id` (string, required): The `_id` of the team to delete.
+*   **Success Response (200 OK):**
+    ```json
+    {
+      "success": true,
+      "data": {}
+    }
+    ```
+
+### 6. Add a member to a team
+
+*   **Endpoint:** `POST /api/v1/teams/:id/members/:userId`
+*   **Description:** Adds a user to a team.
+*   **Authorization:** Requires permission `P127`.
+*   **URL Parameters:**
+    *   `id` (string, required): The `_id` of the team.
+    *   `userId` (string, required): The `_id` of the user to add.
+*   **Success Response (200 OK):** Returns the updated team object.
+
+### 7. Remove a member from a team
+
+*   **Endpoint:** `DELETE /api/v1/teams/:id/members/:userId`
+*   **Description:** Removes a user from a team.
+*   **Authorization:** Requires permission `P128`.
+*   **URL Parameters:**
+    *   `id` (string, required): The `_id` of the team.
+    *   `userId` (string, required): The `_id` of nutty to remove.
+*   **Success Response (200 OK):** Returns the updated team object.
+
+---
+
+## Support Group Management API
+
+**Base Path:** `/api/v1/support-groups`
+
+This API is for managing support groups.
+
+### 1. Create a new support group
+
+*   **Endpoint:** `POST /api/v1/support-groups`
+*   **Description:** Creates a new support group.
+*   **Authorization:** Requires permission `P129`.
+*   **Request Body:**
+    ```json
+    {
+      "name": "Support Group Alpha",
+      "supervisor": "60d0fe4f5311236168a109ca"
+    }
+    ```
+*   **Success Response (201 Created):** Returns the created support group object.
+
+### 2. Get all support groups
+
+*   **Endpoint:** `GET /api/v1/support-groups`
+*   **Description:** Retrieves a list of all support groups.
+*   **Authorization:** Requires permission `P130`.
+*   **Success Response (200 OK):** Returns an array of all support group objects.
+
+### 3. Get support group by ID
+
+*   **Endpoint:** `GET /api/v1/support-groups/:id`
+*   **Description:** Retrieves a single support group by its unique database `_id`.
+*   **Authorization:** Requires permission `P131`.
+*   **URL Parameters:**
+    *   `id` (string, required): The `_id` of the support group.
+*   **Success Response (200 OK):** Returns the requested support group object.
+
+### 4. Update a support group
+
+*   **Endpoint:** `PUT /api/v1/support-groups/:id`
+*   **Description:** Updates an existing support group by its `_id`.
+*   **Authorization:** Requires permission `P132`.
+*   **URL Parameters:**
+    *   `id` (string, required): The `_id` of the support group to update.
+*   **Request Body:** An object containing the fields to update.
+*   **Success Response (200 OK):** Returns the full, updated support group object.
+
+### 5. Delete a support group
+
+*   **Endpoint:** `DELETE /api/v1/support-groups/:id`
+*   **Description:** Deletes a support group from the system by its `_id`.
+*   **Authorization:** Requires permission `P133`.
+*   **URL Parameters:**
+    *   `id` (string, required): The `_id` of the support group to delete.
+*   **Success Response (200 OK):**
+    ```json
+    {
+      "success": true,
+      "data": {}
+    }
+    ```
+
+### 6. Add a member to a support group
+
+*   **Endpoint:** `POST /api/v1/support-groups/:id/members/:userId`
+*   **Description:** Adds a user to a support group.
+*   **Authorization:** Requires permission `P134`.
+*   **URL Parameters:**
+    *   `id` (string, required): The `_id` of the support group.
+    *   `userId` (string, required): The `_id` of the user to add.
+*   **Success Response (200 OK):** Returns the updated support group object.
+
+### 7. Remove a member from a support group
+
+*   **Endpoint:** `DELETE /api/v1/support-groups/:id/members/:userId`
+*   **Description:** Removes a user from a support group.
+*   **Authorization:** Requires permission `P135`.
+*   **URL Parameters:**
+    *   `id` (string, required): The `_id` of the support group.
+    *   `userId` (string, required): The `_id` of the user to remove.
+*   **Success Response (200 OK):** Returns the updated support group object.
+
+---
+
+## Analytics API
+
+**Base Path:** `/api/v1/analytics`
+
+This API is for retrieving analytics data.
+
+### 1. Get Sacco Revenue
+
+*   **Endpoint:** `GET /api/v1/analytics/revenue/sacco/:saccoId`
+*   **Description:** Retrieves revenue data for a specific Sacco.
+*   **Authorization:** Requires `sacco`, `support_staff`, or `superuser` role.
+*   **URL Parameters:**
+    *   `saccoId` (string, required): The `_id` of the Sacco.
+*   **Query Parameters:**
+    *   `startDate` (date, optional): The start date for the report.
+    *   `endDate` (date, optional): The end date for the report.
+*   **Success Response (200 OK):** Returns an object with revenue data.
+
+### 2. Get Owner Revenue
+
+*   **Endpoint:** `GET /api/v1/analytics/revenue/owner/:ownerId`
+*   **Description:** Retrieves revenue data for a specific vehicle owner.
+*   **Authorization:** Requires `owner`, `sacco`, `support_staff`, or `superuser` role.
+*   **URL Parameters:**
+    *   `ownerId` (string, required): The `_id` of the owner.
+*   **Query Parameters:**
+    *   `startDate` (date, optional): The start date for the report.
+    *   `endDate` (date, optional): The end date for the report.
+*   **Success Response (200 OK):** Returns an object with revenue data.
+
+### 3. Get Cancellation Stats
+
+*   **Endpoint:** `GET /api/v1/analytics/cancellations/:routeId`
+*   **Description:** Retrieves cancellation statistics for a specific route.
+*   **Authorization:** Requires `sacco`, `support_staff`, or `superuser` role.
+*   **URL Parameters:**
+    *   `routeId` (string, required): The `_id` of the route.
+*   **Success Response (200 OK):** Returns an object with cancellation stats.
+
+### 4. Get Payroll Accuracy
+
+*   **Endpoint:** `GET /api/v1/analytics/payroll/:saccoId`
+*   **Description:** Retrieves payroll accuracy data for a specific Sacco.
+*   **Authorization:** Requires `sacco`, `support_staff`, or `superuser` role.
+*   **URL Parameters:**
+    *   `saccoId` (string, required): The `_id` of the Sacco.
+*   **Success Response (200 OK):** Returns an object with payroll accuracy data.
+
+### 5. Get Loyalty Usage
+
+*   **Endpoint:** `GET /api/v1/analytics/loyalty/:userId`
+*   **Description:** Retrieves loyalty point usage for a specific user.
+*   **Authorization:** The user can view their own loyalty usage. `admin` and `superuser` can view any user's loyalty usage.
+*   **URL Parameters:**
+    *   `userId` (string, required): The `_id` of the user.
+*   **Success Response (200 OK):** Returns an object with loyalty usage data.
+
+### 6. Get User Registration Stats
+
+*   **Endpoint:** `GET /api/v1/analytics/registrations`
+*   **Description:** Retrieves user registration statistics.
+*   **Authorization:** Requires `admin` or `superuser` role.
+*   **Query Parameters:**
+    *   `period` (string, optional): The period for the report ('daily', 'weekly', 'monthly'). Defaults to 'daily'.
+*   **Success Response (200 OK):** Returns an array of objects with registration data.

@@ -114,6 +114,25 @@ class UserManagementService {
     }
     return user;
   }
+
+  /**
+   * @description Get all admin users
+   * @returns {Promise<object[]>} A list of all admin users
+   */
+  async getAdminUsers() {
+    const adminRanks = [
+      'CEO',
+      'CFO',
+      'COO',
+      'CTO',
+      'VP',
+      'Director',
+      'Manager',
+      'Supervisor',
+    ];
+    const adminUsers = await User.find({ rank: { $in: adminRanks } });
+    return adminUsers;
+  }
 }
 
 module.exports = new UserManagementService();
