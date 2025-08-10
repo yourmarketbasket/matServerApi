@@ -7,9 +7,6 @@ const { authorize } = require('../middlewares/rbac.middleware');
 // Publicly viewable queue for a route
 router.get('/:routeId', QueueController.getQueues);
 
-// Protected routes for Saccos and Support Staff
-const isSaccoOrSupport = authorize('sacco', 'support_staff');
-router.post('/', protect, isSaccoOrSupport, QueueController.createQueue);
-router.delete('/:id', protect, isSaccoOrSupport, QueueController.deleteQueue);
+// Protected routes are now handled under /queue-managers/
 
 module.exports = router;

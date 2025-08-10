@@ -6,6 +6,12 @@ const QueueManagerAuthController = require('../controllers/queueManager.auth.con
 router.post('/signup', QueueManagerAuthController.signup);
 router.post('/login', QueueManagerAuthController.login);
 
-// Add other QueueManager-specific routes here later
+const { protect } = require('../middlewares/auth.middleware');
+const { authorize } = require('../middlewares/rbac.middleware');
+
+// --- Protected Routes ---
+router.post('/add-trip', protect, authorize('P089'), QueueManagerController.addTripToQueue);
+router.delete('/remove-trip/:id', protect, authorize('P089'), QueueManagerController.removeTripFromQueue);
+
 
 module.exports = router;

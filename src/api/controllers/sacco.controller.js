@@ -1,4 +1,6 @@
 const SaccoService = require('../services/sacco.service');
+const RouteService = require('../services/route.service');
+const VehicleService = require('../services/vehicle.service');
 
 /**
  * @class SaccoController
@@ -60,6 +62,88 @@ class SaccoController {
       // const { id } = req.params;
       // await SaccoService.deleteSacco(id);
       res.status(200).json({ success: true, message: 'Sacco deleted successfully' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // --- Route Management ---
+  async createRoute(req, res, next) {
+    try {
+      req.body.saccoId = req.user._id; // The logged-in sacco is the owner
+      const route = await RouteService.createRoute(req.body);
+      res.status(201).json({ success: true, data: route });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateRoute(req, res, next) {
+    try {
+      const { id } = req.params;
+      const route = await RouteService.updateRoute(id, req.body);
+      res.status(200).json({ success: true, data: route });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async finalizeRoute(req, res, next) {
+    try {
+      const { id } = req.params;
+      const route = await RouteService.finalizeRoute(id);
+      res.status(200).json({ success: true, data: route });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteRoute(req, res, next) {
+    try {
+      const { id } = req.params;
+      await RouteService.deleteRoute(id);
+      res.status(200).json({ success: true, data: {} });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async addFareAdjustment(req, res, next) {
+    try {
+      const { id } = req.params;
+      const route = await RouteService.addFareAdjustment(id, req.body);
+      res.status(200).json({ success: true, data: route });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // --- Vehicle Management ---
+  async createVehicle(req, res, next) {
+    try {
+      req.body.saccoId = req.user._id; // The logged-in sacco is the owner
+      const vehicle = await VehicleService.createVehicle(req.body);
+      res.status(201).json({ success: true, data: vehicle });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateVehicle(req, res, next) {
+    try {
+      const { id } = req.params;
+      const vehicle = await VehicleService.updateVehicle(id, req.body);
+      res.status(200).json({ success: true, data: vehicle });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteVehicle(req, res, next) {
+    try {
+      const { id } = req.params;
+      await VehicleService.deleteVehicle(id);
+      res.status(200).json({ success: true, data: {} });
     } catch (error) {
       next(error);
     }
