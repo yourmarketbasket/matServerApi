@@ -36,6 +36,8 @@ const teamRoutes = require('./api/routes/team.routes');
 const supportGroupRoutes = require('./api/routes/supportGroup.routes');
 const busOperatorRoutes = require('./api/routes/busOperator.routes');
 const passengerRoutes = require('./api/routes/passenger.routes');
+const ownerRoutes = require('./api/routes/owner.routes');
+const queueManagerRoutes = require('./api/routes/queueManager.routes');
 
 // Connect to MongoDB
 connectDB();
@@ -99,6 +101,8 @@ app.use(`${apiPrefix}/teams`, teamRoutes);
 app.use(`${apiPrefix}/support-groups`, supportGroupRoutes);
 app.use(`${apiPrefix}/bus-operators`, busOperatorRoutes);
 app.use(`${apiPrefix}/passengers`, passengerRoutes);
+app.use(`${apiPrefix}/owners`, ownerRoutes);
+app.use(`${apiPrefix}/queue-managers`, queueManagerRoutes);
 
 // --- Temporary Email Test Route ---
 const NotificationService = require('./api/services/notification.service');

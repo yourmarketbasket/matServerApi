@@ -2,19 +2,18 @@ const jwt = require('jsonwebtoken');
 const config = require('../../config');
 const Staff = require('../models/staff.model');
 const Passenger = require('../models/passenger.model');
-// Import other user type models as they are created
-// const Driver = require('../models/driver.model');
-// const Sacco = require('../models/sacco.model');
-// const Owner = require('../models/owner.model');
-// const QueueManager = require('../models/queueManager.model');
+const Driver = require('../models/driver.model');
+const Sacco = require('../models/sacco.model');
+const Owner = require('../models/owner.model');
+const QueueManager = require('../models/queueManager.model');
 
 const userModels = {
   staff: Staff,
   passenger: Passenger,
-  // driver: Driver,
-  // sacco: Sacco,
-  // owner: Owner,
-  // queueManager: QueueManager,
+  driver: Driver,
+  sacco: Sacco,
+  owner: Owner,
+  queue_manager: QueueManager,
 };
 
 /**

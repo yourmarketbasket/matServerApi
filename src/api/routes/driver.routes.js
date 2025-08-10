@@ -1,8 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const DriverController = require('../controllers/driver.controller');
+const DriverAuthController = require('../controllers/driver.auth.controller');
 const { protect } = require('../middlewares/auth.middleware');
 const { authorize } = require('../middlewares/rbac.middleware');
+
+// Public routes for driver signup and login
+router.post('/signup', DriverAuthController.signup);
+router.post('/login', DriverAuthController.login);
 
 // Saccos and Owners should be able to see drivers.
 router.get('/:saccoId', protect, authorize('P062', 'P086'), DriverController.getDrivers);
