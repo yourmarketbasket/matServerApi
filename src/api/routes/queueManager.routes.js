@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const QueueManagerController = require('../controllers/queueManager.controller');
 const QueueManagerAuthController = require('../controllers/queueManager.auth.controller');
 
 // Public routes for QueueManager signup and login
