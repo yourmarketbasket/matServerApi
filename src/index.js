@@ -10,6 +10,7 @@ const morgan = require('morgan');
 const config = require('./config');
 const connectDB = require('./loaders/db');
 const { encryptionMiddleware } = require('./api/middlewares/encryption.middleware');
+const auditMiddleware = require('./api/middlewares/audit.middleware');
 
 // --- Import all routes ---
 const authRoutes = require('./api/routes/auth.routes');
@@ -57,6 +58,8 @@ app.use(express.json()); // Body parser for JSON
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet()); // Set security headers
 app.use(cors()); // Enable Cross-Origin Resource Sharing
+
+app.use(auditMiddleware);
 
 // Logging middleware
 if (config.nodeEnv === 'development') {
