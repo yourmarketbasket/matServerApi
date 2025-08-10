@@ -11,6 +11,7 @@ const config = require('./config');
 const connectDB = require('./loaders/db');
 const { encryptionMiddleware } = require('./api/middlewares/encryption.middleware');
 const auditMiddleware = require('./api/middlewares/audit.middleware');
+const rateLimitMiddleware = require('./api/middlewares/rateLimit.middleware');
 
 // --- Import all routes ---
 const authRoutes = require('./api/routes/auth.routes');
@@ -59,6 +60,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(helmet()); // Set security headers
 app.use(cors()); // Enable Cross-Origin Resource Sharing
 
+// Apply rate limiting and audit logging to all requests
+app.use(rateLimitMiddleware);
 app.use(auditMiddleware);
 
 // Logging middleware
