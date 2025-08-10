@@ -84,7 +84,7 @@ class SuperuserService {
     }
 
     // 3. Generate JWT
-    const token = generateToken(user._id);
+    const token = generateToken(user);
 
     // Don't return password or mfaSecret
     user.password = undefined;

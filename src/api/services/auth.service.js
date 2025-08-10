@@ -80,7 +80,7 @@ class AuthService {
     }
 
     // Generate JWT
-    const token = generateToken(user._id);
+    const token = generateToken(user);
 
     // Prepare user object for response (omitting sensitive fields)
     const userResponse = user.toObject();
