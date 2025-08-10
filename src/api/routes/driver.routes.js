@@ -19,4 +19,10 @@ router.post('/', protect, authorize('P062', 'P086'), DriverController.createDriv
 // Saccos can update driver details
 router.put('/:id', protect, authorize('P064'), DriverController.updateDriver);
 
+// --- Driver Trip Management ---
+router.post('/trips', protect, authorize('P096'), DriverController.createTrip);
+router.put('/trips/:id/cancel', protect, authorize('P096'), DriverController.cancelTrip);
+router.put('/trips/:id/complete', protect, authorize('P096'), DriverController.completeTrip);
+
+
 module.exports = router;

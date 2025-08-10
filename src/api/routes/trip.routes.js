@@ -8,9 +8,6 @@ const { authorize } = require('../middlewares/rbac.middleware');
 router.get('/:routeId', TripController.getTrips);
 
 // Protected routes
-const canManageTrips = authorize('sacco', 'driver', 'support_staff');
-router.post('/', protect, canManageTrips, TripController.createTrip);
-router.put('/:id/cancel', protect, canManageTrips, TripController.cancelTrip);
-router.put('/:id/complete', protect, canManageTrips, TripController.completeTrip);
+
 
 module.exports = router;
