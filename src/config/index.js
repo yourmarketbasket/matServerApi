@@ -8,6 +8,6 @@ module.exports = {
   encryptionKey: process.env.ENCRYPTION_KEY,
   rateLimit: {
     windowMs: 60 * 1000, // 1 minute
-    maxRequests: 1000,   // Limit each IP to 1000 requests per windowMs
+    maxRequests: 100,    // Limit each IP to 100 requests per windowMs
   },
 };
