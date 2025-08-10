@@ -5,16 +5,6 @@ const TicketService = require('../services/ticket.service');
  * @description Controller for ticket management
  */
 class TicketController {
-  async createTicket(req, res, next) {
-    try {
-      req.body.passengerId = req.user._id;
-      const result = await TicketService.registerTicket(req.body, req.io);
-      res.status(201).json({ success: true, data: result });
-    } catch (error) {
-      next(error);
-    }
-  }
-
   async getTickets(req, res, next) {
     try {
       const { userId } = req.params;

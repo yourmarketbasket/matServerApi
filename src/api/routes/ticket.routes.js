@@ -7,7 +7,6 @@ const { authorize } = require('../middlewares/rbac.middleware');
 // All routes are protected
 router.use(protect);
 
-router.post('/', TicketController.createTicket);
 router.get('/:userId', TicketController.getTickets);
 router.get('/scan/:qrCode', authorize('queue_manager', 'driver'), TicketController.scanTicket);
 
