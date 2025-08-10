@@ -77,7 +77,8 @@ class AuthService {
    * @returns {Promise<{user: object}>}
    */
   async signup(userData, io) {
-    const { name, email, phone, password, role, verifiedToken } = userData;
+    const { name, email, phone, password, verifiedToken } = userData;
+    const role = userData.role || 'ordinary';
 
     if (!verifiedToken) {
       throw new Error('Verification token is required.');

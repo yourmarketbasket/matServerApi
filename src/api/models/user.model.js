@@ -31,8 +31,8 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['passenger', 'sacco', 'owner', 'queue_manager', 'driver', 'support_staff', 'admin', 'superuser'],
-    required: true,
+    enum: ['passenger', 'sacco', 'owner', 'queue_manager', 'driver', 'support_staff', 'admin', 'superuser', 'ordinary'],
+    default: 'ordinary',
   },
   rank: {
     type: String,
