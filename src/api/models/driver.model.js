@@ -1,12 +1,11 @@
 const mongoose = require('mongoose');
+const baseSchema = require('./schemas/base.schema');
 
-const DriverSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    unique: true, // One user profile should correspond to one driver profile
-  },
+// Clone the base schema
+const driverSchema = baseSchema.clone();
+
+// Add fields specific to Drivers
+driverSchema.add({
   licenseNumber: {
     type: String,
     required: [true, 'Please provide a license number'],
@@ -21,7 +20,6 @@ const DriverSchema = new mongoose.Schema({
     ref: 'Sacco',
     required: true,
   },
-  // A driver might be assigned to a primary vehicle
   vehicleId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Vehicle',
@@ -32,10 +30,6 @@ const DriverSchema = new mongoose.Schema({
     safetyIncidents: { type: Number, default: 0 },
     revenueGenerated: { type: Number, default: 0 },
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
 });
 
-module.exports = mongoose.model('Driver', DriverSchema);
+module.exports = mongoose.model('Driver', driverSchema);

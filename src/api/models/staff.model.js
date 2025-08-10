@@ -1,42 +1,16 @@
-const crypto = require('crypto');
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const baseSchema = require('./schemas/base.schema');
 
-const StaffSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'Please provide a name'],
-    trim: true,
-  },
-  email: {
-    type: String,
-    required: [true, 'Please provide an email'],
-    unique: true,
-    match: [
-      /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
-      'Please add a valid email',
-    ],
-    lowercase: true,
-  },
-  phone: {
-    type: String,
-    required: [true, 'Please provide a phone number'],
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: [true, 'Please provide a password'],
-    minlength: 6,
-    select: false, // Do not return password on query by default
-  },
+// Clone the base schema to avoid modifying the original
+const staffSchema = baseSchema.clone();
+
+// Add fields specific to the Staff model
+staffSchema.add({
   role: {
     type: String,
     enum: ['support_staff', 'admin', 'superuser', 'ordinary'],
     default: 'ordinary',
-  },
-  rating: {
-    type: Number,
-    default: 0,
+    required: true,
   },
   rank: {
     type: String,
@@ -56,78 +30,6 @@ const StaffSchema = new mongoose.Schema({
     ],
     default: 'Ordinary',
   },
-  avatar: {
-    type: String,
-  },
-  approvedStatus: {
-    type: String,
-    enum: ['pending', 'approved', 'suspended', 'blocked'],
-    default: 'pending',
-  },
-  permissions: {
-    type: [String],
-    default: [],
-  },
-  verified: {
-    type: {
-      email: { type: Boolean, default: false },
-      phone: { type: Boolean, default: false },
-    },
-    default: { email: false, phone: false },
-  },
-  mfaSecret: {
-    type: String,
-  },
-  failedLoginAttempts: {
-    type: Number,
-    default: 0,
-  },
-  lockUntil: {
-    type: Date,
-  },
-  passwordResetToken: String,
-  passwordResetExpire: Date,
-  tokenValidAfter: Date,
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
 });
 
-// Encrypt password using bcrypt before saving
-StaffSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
-});
-
-// Sign JWT and return
-// This method will be implemented later in the service layer
-// StaffSchema.methods.getSignedJwtToken = function () { ... }
-
-// Match user entered password to hashed password in database
-StaffSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
-};
-
-// Generate and hash password reset token
-StaffSchema.methods.getResetPasswordToken = function () {
-  // Generate token
-  const resetToken = crypto.randomBytes(20).toString('hex');
-
-  // Hash token and set to passwordResetToken field
-  this.passwordResetToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex');
-
-  // Set expire time (e.g., 10 minutes)
-  this.passwordResetExpire = Date.now() + 10 * 60 * 1000;
-
-  return resetToken;
-};
-
-module.exports = mongoose.model('Staff', StaffSchema);
+module.exports = mongoose.model('Staff', staffSchema);

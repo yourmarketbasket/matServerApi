@@ -1,18 +1,17 @@
 const mongoose = require('mongoose');
+const baseSchema = require('./schemas/base.schema');
 
-const SaccoSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'Please provide a Sacco name'],
-    trim: true,
-    unique: true,
-  },
+// Clone the base schema
+const saccoSchema = baseSchema.clone();
+
+// Add fields specific to Saccos
+saccoSchema.add({
   license: {
     type: String,
     required: [true, 'Please provide a license number'],
     unique: true,
   },
-  contact: {
+  contactPerson: {
     type: String,
     required: [true, 'Please provide a contact person'],
   },
@@ -20,20 +19,6 @@ const SaccoSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  status: {
-    type: String,
-    enum: ['pending', 'approved', 'rejected'],
-    default: 'pending',
-  },
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Reference to the support staff who created the Sacco
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
 });
 
-module.exports = mongoose.model('Sacco', SaccoSchema);
+module.exports = mongoose.model('Sacco', saccoSchema);
