@@ -184,7 +184,21 @@ class SuperuserService {
   }
 
   async createPermission(permissionData) {
-    return await Permission.create(permissionData);
+    const newPermission = await Permission.create(permissionData);
+
+    // After creating the permission, update all users who have the relevant roles.
+    if (newPermission && newPermission.roles && newPermission.roles.length > 0) {
+      const rolesToUpdate = newPermission.roles.map(role => role.toLowerCase());
+      const permissionNumber = newPermission.permissionNumber;
+
+      // Update all users whose role is in the rolesToUpdate array
+      await User.updateMany(
+        { role: { $in: rolesToUpdate } },
+        { $addToSet: { permissions: permissionNumber } }
+      );
+    }
+
+    return newPermission;
   }
 
   async updatePermission(id, permissionData) {
