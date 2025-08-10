@@ -133,6 +133,23 @@ class UserManagementService {
     const adminUsers = await User.find({ rank: { $in: adminRanks } });
     return adminUsers;
   }
+
+  /**
+   * @description Initiates a remote logout for a user by invalidating all their existing tokens.
+   * @param {string} userId - The ID of the user to log out.
+   * @returns {Promise<{success: boolean, message: string}>}
+   */
+  async remoteLogout(userId) {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('User not found.');
+    }
+
+    user.tokenValidAfter = new Date();
+    await user.save();
+
+    return { success: true, message: `Successfully initiated remote logout for user ${user.name}.` };
+  }
 }
 
 module.exports = new UserManagementService();

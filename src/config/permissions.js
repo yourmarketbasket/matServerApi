@@ -890,6 +890,14 @@ const permissionsData = {
       "modulePage": "User Management Page",
       "httpMethod": "PUT",
       "constraints": "None"
+    },
+    {
+      "permissionNumber": "P117",
+      "description": "Remotely log out a user",
+      "roles": ["Superuser", "Admin"],
+      "modulePage": "User Management Page",
+      "httpMethod": "POST",
+      "constraints": "None"
     }
   ]
 };

@@ -94,6 +94,19 @@ class UserManagementController {
       next(error);
     }
   }
+
+  async remoteLogout(req, res, next) {
+    try {
+      const { userId } = req.body;
+      if (!userId) {
+        return next(new Error('User ID is required in the request body.'));
+      }
+      const result = await UserManagementService.remoteLogout(userId);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 // force --- IGNORE ---
 

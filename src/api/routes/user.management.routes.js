@@ -16,4 +16,7 @@ router.put('/:id/rank', authorize('P114'), UserManagementController.updateUserRa
 router.post('/:id/permissions', authorize('P115'), UserManagementController.addUserPermissions);
 router.delete('/:id/permissions/:permission', authorize('P116'), UserManagementController.removeUserPermission);
 
+// Route for remote logout
+router.post('/remote-logout', authorize('P117'), UserManagementController.remoteLogout);
+
 module.exports = router;

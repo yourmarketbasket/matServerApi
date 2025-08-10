@@ -31,6 +31,14 @@ const protect = async (req, res, next) => {
         return res.status(401).json({ success: false, message: 'Not authorized, user not found' });
     }
 
+    // Check if the token was issued before the user's `tokenValidAfter` timestamp
+    if (req.user.tokenValidAfter) {
+      const tokenIssuedAt = decoded.iat * 1000;
+      if (tokenIssuedAt < req.user.tokenValidAfter.getTime()) {
+        return res.status(401).json({ success: false, message: 'Token has been invalidated, please log in again.' });
+      }
+    }
+
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
