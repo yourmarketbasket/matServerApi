@@ -6,19 +6,19 @@
  */
 const authorize = (...requiredPermissions) => {
   return (req, res, next) => {
-    if (!req.user) {
+    if (!req.staff) {
       return res.status(403).json({
         success: false,
-        message: 'User not found. Authorization check failed.'
+        message: 'Staff member not found. Authorization check failed.'
       });
     }
 
-    // If user is a superuser, grant access immediately without checking permissions.
-    if (req.user.role === 'superuser') {
+    // If staff member is a superuser, grant access immediately without checking permissions.
+    if (req.staff.role === 'superuser') {
       return next();
     }
 
-    const userPermissions = req.user.permissions || [];
+    const userPermissions = req.staff.permissions || [];
 
     const hasPermission = requiredPermissions.some(p => userPermissions.includes(p));
 

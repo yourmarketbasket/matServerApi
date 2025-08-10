@@ -66,8 +66,8 @@ class AuthController {
 
   async setupMFA(req, res, next) {
     try {
-      // The user ID should come from the authenticated user session (req.user)
-      const result = await AuthService.setupMFA(req.user._id);
+      // The user ID should come from the authenticated user session (req.staff)
+      const result = await AuthService.setupMFA(req.staff._id);
       res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
@@ -77,7 +77,7 @@ class AuthController {
   async verifyMFA(req, res, next) {
     try {
       const { token } = req.body;
-      const result = await AuthService.verifyMFA(req.user._id, token, req.io);
+      const result = await AuthService.verifyMFA(req.staff._id, token, req.io);
       res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
@@ -86,7 +86,7 @@ class AuthController {
 
   async verifyPhone(req, res, next) {
     try {
-      const { id } = req.user; // from protect middleware
+      const { id } = req.staff; // from protect middleware
       const result = await AuthService.verifyPhone(id);
       res.status(200).json({ success: true, data: result });
     } catch (error) {

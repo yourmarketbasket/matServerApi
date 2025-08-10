@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const config = require('../../config');
-const User = require('../models/user.model');
+const Staff = require('../models/staff.model');
 
 /**
  * @description Middleware to protect routes by verifying a JWT.
@@ -24,17 +24,17 @@ const protect = async (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, config.jwtSecret);
 
-    // Attach user to the request object
-    req.user = await User.findById(decoded.id).select('-password');
+    // Attach staff member to the request object
+    req.staff = await Staff.findById(decoded.id).select('-password');
 
-    if (!req.user) {
-        return res.status(401).json({ success: false, message: 'Not authorized, user not found' });
+    if (!req.staff) {
+        return res.status(401).json({ success: false, message: 'Not authorized, staff member not found' });
     }
 
-    // Check if the token was issued before the user's `tokenValidAfter` timestamp
-    if (req.user.tokenValidAfter) {
+    // Check if the token was issued before the staff member's `tokenValidAfter` timestamp
+    if (req.staff.tokenValidAfter) {
       const tokenIssuedAt = decoded.iat * 1000;
-      if (tokenIssuedAt < req.user.tokenValidAfter.getTime()) {
+      if (tokenIssuedAt < req.staff.tokenValidAfter.getTime()) {
         return res.status(401).json({ success: false, message: 'Token has been invalidated, please log in again.' });
       }
     }

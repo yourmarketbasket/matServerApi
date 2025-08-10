@@ -35,7 +35,7 @@ const auditMiddleware = (req, res, next) => {
     const requestPayloadForLogging = maskData(req.body);
 
     const logData = {
-      user: req.user ? req.user.id : null,
+      user: req.staff ? req.staff.id : null,
       ipAddress: req.ip,
       method: req.method,
       url: req.originalUrl,

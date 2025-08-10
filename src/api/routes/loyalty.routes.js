@@ -16,7 +16,7 @@ router.post('/redeem', isSupport, LoyaltyController.redeemPoints);
 
 // A user should only be able to see their own loyalty status
 const canViewOwnLoyalty = (req, res, next) => {
-    if (req.user.id === req.params.userId || ['admin', 'superuser', 'support_staff'].includes(req.user.role)) {
+    if (req.staff.id === req.params.userId || ['admin', 'superuser', 'support_staff'].includes(req.staff.role)) {
         return next();
     }
     return res.status(403).json({ success: false, message: 'Forbidden' });

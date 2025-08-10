@@ -7,7 +7,7 @@ const BusOperatorService = require('../services/busOperator.service');
 class BusOperatorController {
   async registerOperator(req, res, next) {
     try {
-      req.body.createdBy = req.user._id;
+      req.body.createdBy = req.staff._id;
       const operator = await BusOperatorService.registerOperator(req.body);
       res.status(201).json({ success: true, data: operator });
     } catch (error) {

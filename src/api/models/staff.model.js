@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const UserSchema = new mongoose.Schema({
+const StaffSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'Please provide a name'],
@@ -31,8 +31,12 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['passenger', 'sacco', 'owner', 'queue_manager', 'driver', 'support_staff', 'admin', 'superuser', 'ordinary'],
+    enum: ['support_staff', 'admin', 'superuser', 'ordinary'],
     default: 'ordinary',
+  },
+  rating: {
+    type: Number,
+    default: 0,
   },
   rank: {
     type: String,
@@ -91,7 +95,7 @@ const UserSchema = new mongoose.Schema({
 });
 
 // Encrypt password using bcrypt before saving
-UserSchema.pre('save', async function (next) {
+StaffSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
   }
@@ -102,15 +106,15 @@ UserSchema.pre('save', async function (next) {
 
 // Sign JWT and return
 // This method will be implemented later in the service layer
-// UserSchema.methods.getSignedJwtToken = function () { ... }
+// StaffSchema.methods.getSignedJwtToken = function () { ... }
 
 // Match user entered password to hashed password in database
-UserSchema.methods.matchPassword = async function (enteredPassword) {
+StaffSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
 // Generate and hash password reset token
-UserSchema.methods.getResetPasswordToken = function () {
+StaffSchema.methods.getResetPasswordToken = function () {
   // Generate token
   const resetToken = crypto.randomBytes(20).toString('hex');
 
@@ -126,4 +130,4 @@ UserSchema.methods.getResetPasswordToken = function () {
   return resetToken;
 };
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('Staff', StaffSchema);

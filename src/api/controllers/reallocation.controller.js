@@ -19,7 +19,7 @@ class ReallocationController {
   async manualReallocate(req, res, next) {
     try {
       const { ticketId, newTripId } = req.body;
-      const result = await ReallocationService.manualReallocateTicket(ticketId, newTripId, req.user._id, req.io);
+      const result = await ReallocationService.manualReallocateTicket(ticketId, newTripId, req.staff._id, req.io);
       res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);

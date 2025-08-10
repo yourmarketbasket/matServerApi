@@ -1,4 +1,4 @@
-const User = require('../models/user.model');
+const Staff = require('../models/staff.model');
 const OTP = require('../models/otp.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -15,92 +15,92 @@ const config = require('../../config');
  */
 class AuthService {
   /**
-   * @description Authenticates a user
-   * @param {string} emailOrPhone - The user's email or phone
-   * @param {string} password - The user's password
+   * @description Authenticates a staff member
+   * @param {string} emailOrPhone - The staff member's email or phone
+   * @param {string} password - The staff member's password
    * @param {string} [mfaCode] - The MFA code if required
-   * @returns {Promise<{user: object, token: string}>}
+   * @returns {Promise<{staff: object, token: string}>}
    */
   async login(emailOrPhone, password, mfaCode) {
-    const user = await User.findOne({
+    const staff = await Staff.findOne({
       $or: [{ email: emailOrPhone }, { phone: emailOrPhone }],
     }).select('+password +failedLoginAttempts +lockUntil');
 
-    if (!user) {
+    if (!staff) {
       // We throw a generic error to prevent attackers from guessing which usernames are valid.
       throw new Error('Invalid credentials');
     }
 
     // Check if the account is currently locked.
-    if (user.lockUntil && user.lockUntil > Date.now()) {
-      const remainingMinutes = Math.ceil((user.lockUntil - Date.now()) / 60000);
+    if (staff.lockUntil && staff.lockUntil > Date.now()) {
+      const remainingMinutes = Math.ceil((staff.lockUntil - Date.now()) / 60000);
       throw new Error(`Account is locked due to too many failed login attempts. Please try again in ${remainingMinutes} minutes.`);
     }
 
-    // Check if user is approved
-    if (user.approvedStatus !== 'approved') {
-      throw new Error(`Your account is currently ${user.approvedStatus}. Please contact support.`);
+    // Check if staff member is approved
+    if (staff.approvedStatus !== 'approved') {
+      throw new Error(`Your account is currently ${staff.approvedStatus}. Please contact support.`);
     }
 
     // Prevent superuser login through this general portal
-    if (user.role === 'superuser') {
+    if (staff.role === 'superuser') {
       throw new Error('Superuser login is not allowed here.');
     }
 
     // Check if password matches
-    const isMatch = await user.matchPassword(password);
+    const isMatch = await staff.matchPassword(password);
 
     if (!isMatch) {
-      user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
-      if (user.failedLoginAttempts >= 3) {
+      staff.failedLoginAttempts = (staff.failedLoginAttempts || 0) + 1;
+      if (staff.failedLoginAttempts >= 3) {
         const fiveHours = 5 * 60 * 60 * 1000;
-        user.lockUntil = new Date(Date.now() + fiveHours);
-        user.failedLoginAttempts = 0; // Reset counter after locking
+        staff.lockUntil = new Date(Date.now() + fiveHours);
+        staff.failedLoginAttempts = 0; // Reset counter after locking
       }
-      await user.save();
+      await staff.save();
       throw new Error('Invalid credentials');
     }
 
     // If login is successful, reset failed attempts and unlock account if it was locked.
-    if (user.failedLoginAttempts > 0 || user.lockUntil) {
-      user.failedLoginAttempts = 0;
-      user.lockUntil = null;
-      await user.save();
+    if (staff.failedLoginAttempts > 0 || staff.lockUntil) {
+      staff.failedLoginAttempts = 0;
+      staff.lockUntil = null;
+      await staff.save();
     }
 
     // Check MFA if enabled
-    if (user.mfaSecret) {
+    if (staff.mfaSecret) {
       if (!mfaCode) {
-        return { mfaRequired: true, userId: user._id };
+        return { mfaRequired: true, userId: staff._id };
       }
-      const isMfaValid = verifyMfaToken(user.mfaSecret, mfaCode);
+      const isMfaValid = verifyMfaToken(staff.mfaSecret, mfaCode);
       if (!isMfaValid) {
         throw new Error('Invalid MFA code');
       }
     }
 
     // Generate JWT
-    const token = generateToken(user);
+    const token = generateToken(staff);
 
-    // Prepare user object for response (omitting sensitive fields)
-    const userResponse = user.toObject();
-    delete userResponse.password;
-    delete userResponse.mfaSecret;
-    delete userResponse.failedLoginAttempts;
-    delete userResponse.lockUntil;
+    // Prepare staff object for response (omitting sensitive fields)
+    const staffResponse = staff.toObject();
+    delete staffResponse.password;
+    delete staffResponse.mfaSecret;
+    delete staffResponse.failedLoginAttempts;
+    delete staffResponse.lockUntil;
 
-    return { user: userResponse, token };
+    return { staff: staffResponse, token };
   }
 
   /**
-   * @description Registers a new user after OTP verification.
-   * @param {object} userData - The user's data, including a verifiedToken
+   * @description Registers a new staff member after OTP verification.
+   * @param {object} staffData - The staff member's data, including a verifiedToken
    * @param {object} io - The Socket.IO instance
-   * @returns {Promise<{user: object}>}
+   * @returns {Promise<{staff: object}>}
    */
-  async signup(userData, io) {
-    const { name, email, phone, password, verifiedToken } = userData;
-    const role = userData.role || 'ordinary';
+  async signup(staffData, io) {
+    const { name, email, phone, password, verifiedToken } = staffData;
+    const role = staffData.role || 'ordinary';
 
     if (!verifiedToken) {
       throw new Error('Verification token is required.');
@@ -119,17 +119,17 @@ class AuthService {
       throw new Error('Verification token does not match the provided email.');
     }
 
-    // 3. Check if user already exists
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      throw new Error('User with that email already exists.');
+    // 3. Check if staff member already exists
+    const staffExists = await Staff.findOne({ email });
+    if (staffExists) {
+      throw new Error('Staff with that email already exists.');
     }
 
     // 4. Get permissions for the role
     const permissions = await getPermissionsForRole(role);
 
-    // 5. Create a new user instance
-    const user = new User({
+    // 5. Create a new staff instance
+    const staff = new Staff({
       name,
       email,
       phone,
@@ -139,21 +139,15 @@ class AuthService {
       verified: { email: true, phone: false },
     });
 
-    // 6. Set approval status based on role
-    let emailBody = '';
-    if (user.role === 'passenger') {
-      user.approvedStatus = 'approved';
-      emailBody = 'Congratulations! Your account is now active. You can log in and start using Safary.';
-    } else {
-      emailBody = 'Welcome to Safary! Your account has been created and is now pending review by an administrator. We will notify you once it has been approved.';
-    }
+    // 6. All new staff are pending review by default
+    const emailBody = 'Welcome to Safary! Your account has been created and is now pending review by an administrator. We will notify you once it has been approved.';
 
-    // 7. Save the new user
-    await user.save();
+    // 7. Save the new staff member
+    await staff.save();
 
-    // 7. Send welcome/status notification
+    // 8. Send welcome/status notification
     await NotificationService.sendEmail({
-      to: user.email,
+      to: staff.email,
       subject: 'Welcome to Safary!',
       context: {
         title: 'Welcome!',
@@ -161,37 +155,37 @@ class AuthService {
       }
     });
 
-    // 8. Delete the OTP that was used for this registration
-    console.log(`[AuthService.signup] Deleting OTP for email: ${user.email}`);
-    await OTP.deleteOne({ email: user.email });
-    console.log(`[AuthService.signup] Successfully deleted OTP for email: ${user.email}`);
+    // 9. Delete the OTP that was used for this registration
+    console.log(`[AuthService.signup] Deleting OTP for email: ${staff.email}`);
+    await OTP.deleteOne({ email: staff.email });
+    console.log(`[AuthService.signup] Successfully deleted OTP for email: ${staff.email}`);
 
-    // 9. Don't return the password
-    user.password = undefined;
+    // 10. Don't return the password
+    staff.password = undefined;
 
-    // 10. Emit a real-time event
-    io.emit('userRegistered', { user });
+    // 11. Emit a real-time event
+    io.emit('staffRegistered', { staff });
 
-    return { user };
+    return { staff };
   }
 
   /**
    * @description Generates a password reset token
-   * @param {string} email - The user's email
+   * @param {string} email - The staff member's email
    * @returns {Promise<void>}
    */
   async forgotPassword(email) {
-    const user = await User.findOne({ email });
+    const staff = await Staff.findOne({ email });
 
-    if (!user) {
-      // We don't want to reveal if a user exists or not
+    if (!staff) {
+      // We don't want to reveal if a staff member exists or not
       return;
     }
 
     // Get reset token
-    const resetToken = user.getResetPasswordToken();
+    const resetToken = staff.getResetPasswordToken();
 
-    await user.save({ validateBeforeSave: false });
+    await staff.save({ validateBeforeSave: false });
 
     // Here you would typically send an email with the resetToken.
     // For this example, we'll just log it.
@@ -199,8 +193,8 @@ class AuthService {
   }
 
   /**
-   * @description Resets a user's password using a token
-   * @param {string} token - The reset token from the user
+   * @description Resets a staff member's password using a token
+   * @param {string} token - The reset token from the staff member
    * @param {string} newPassword - The new password
    * @returns {Promise<{success: boolean}>}
    */
@@ -211,66 +205,66 @@ class AuthService {
       .update(token)
       .digest('hex');
 
-    const user = await User.findOne({
+    const staff = await Staff.findOne({
       resetPasswordToken,
       passwordResetExpire: { $gt: Date.now() },
     });
 
-    if (!user) {
+    if (!staff) {
       throw new Error('Invalid or expired token');
     }
 
     // Set new password
-    user.password = newPassword;
-    user.passwordResetToken = undefined;
-    user.passwordResetExpire = undefined;
-    await user.save();
+    staff.password = newPassword;
+    staff.passwordResetToken = undefined;
+    staff.passwordResetExpire = undefined;
+    await staff.save();
 
     return { success: true };
   }
 
   /**
-   * @description Sets up MFA for a user
-   * @param {string} userId - The user's ID
+   * @description Sets up MFA for a staff member
+   * @param {string} staffId - The staff member's ID
    * @returns {Promise<{mfaSecret: string, qrCode: string}>}
    */
-  async setupMFA(userId) {
-    const user = await User.findById(userId);
-    if (!user) {
-      throw new Error('User not found');
+  async setupMFA(staffId) {
+    const staff = await Staff.findById(staffId);
+    if (!staff) {
+      throw new Error('Staff not found');
     }
 
-    const { secret, qrCodeDataUrl } = await generateMfaSecret(user.email);
+    const { secret, qrCodeDataUrl } = await generateMfaSecret(staff.email);
 
-    user.mfaSecret = secret;
-    await user.save({ validateBeforeSave: false }); // Bypass validation as we are only adding the secret
+    staff.mfaSecret = secret;
+    await staff.save({ validateBeforeSave: false }); // Bypass validation as we are only adding the secret
 
     return { qrCodeDataUrl };
   }
 
   /**
-   * @description Verifies an MFA code and enables MFA for the user
-   * @param {string} userId - The user's ID
-   * @param {string} token - The MFA code from the user
+   * @description Verifies an MFA code and enables MFA for the staff member
+   * @param {string} staffId - The staff member's ID
+   * @param {string} token - The MFA code from the staff member
    * @param {object} io - The Socket.IO instance
    * @returns {Promise<boolean>}
    */
-  async verifyMFA(userId, token, io) {
-    const user = await User.findById(userId);
-    if (!user || !user.mfaSecret) {
-      throw new Error('MFA not set up or user not found.');
+  async verifyMFA(staffId, token, io) {
+    const staff = await Staff.findById(staffId);
+    if (!staff || !staff.mfaSecret) {
+      throw new Error('MFA not set up or staff member not found.');
     }
 
-    const isVerified = verifyMfaToken(user.mfaSecret, token);
+    const isVerified = verifyMfaToken(staff.mfaSecret, token);
 
     if (!isVerified) {
       throw new Error('Invalid MFA token.');
     }
 
     // The mfa is now considered fully enabled and verified.
-    // We can add a flag to the user model if we want to enforce it from now on.
+    // We can add a flag to the staff model if we want to enforce it from now on.
     // For now, just emitting an event is sufficient.
-    io.to(userId).emit('mfaEnabled', { userId });
+    io.emit('mfaEnabled', { userId: staffId });
 
     return { success: true };
   }
@@ -411,21 +405,21 @@ class AuthService {
   }
 
   /**
-   * @description Verifies a user's phone number (stub).
-   * @param {string} userId - The user's ID.
+   * @description Verifies a staff member's phone number (stub).
+   * @param {string} staffId - The staff member's ID.
    * @returns {Promise<object>}
    */
-  async verifyPhone(userId) {
-    const user = await User.findById(userId);
-    if (!user) {
-      throw new Error('User not found');
+  async verifyPhone(staffId) {
+    const staff = await Staff.findById(staffId);
+    if (!staff) {
+      throw new Error('Staff not found');
     }
 
-    // In a real implementation, we would send an OTP to the user's phone
+    // In a real implementation, we would send an OTP to the staff member's phone
     // and have another method to verify it.
     // For this stub, we'll just mark the phone as verified.
-    user.verified.phone = true;
-    await user.save();
+    staff.verified.phone = true;
+    await staff.save();
 
     return { success: true, message: 'Phone number verified successfully.' };
   }

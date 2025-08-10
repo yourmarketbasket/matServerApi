@@ -1,4 +1,4 @@
-const User = require('../models/user.model');
+const Staff = require('../models/staff.model');
 const Permission = require('../models/permission.model');
 const { generateToken } = require('../utils/jwt.util');
 const { verifyMfaToken } = require('../utils/mfa.util');
@@ -24,7 +24,7 @@ class SuperuserService {
     }
 
     // 2. Check if a superuser already exists
-    const superuserExists = await User.findOne({ role: 'superuser' });
+    const superuserExists = await Staff.findOne({ role: 'superuser' });
     if (superuserExists) {
       throw new Error('A superuser already exists. Cannot register another.');
     }
@@ -35,7 +35,7 @@ class SuperuserService {
     const allPermissions = await getPermissionsForRole('superuser');
 
     // 4. Create a new user instance
-    const superuser = new User({
+    const superuser = new Staff({
       name,
       email,
       phone,
@@ -67,31 +67,31 @@ class SuperuserService {
    */
   async loginSuperuser(emailOrPhone, password, mfaCode) {
     // 1. Find user by email or phone
-    const user = await User.findOne({
+    const staff = await Staff.findOne({
       $or: [{ email: emailOrPhone }, { phone: emailOrPhone }],
       role: 'superuser',
     }).select('+password');
 
-    if (!user) {
+    if (!staff) {
       throw new Error('Invalid credentials or not a superuser.');
     }
 
     // 2. Check if password matches
-    const isMatch = await user.matchPassword(password);
+    const isMatch = await staff.matchPassword(password);
 
     if (!isMatch) {
       throw new Error('Invalid credentials');
     }
 
     // 3. Generate JWT
-    const token = generateToken(user);
+    const token = generateToken(staff);
 
-    // Prepare user object for response (omitting sensitive fields)
-    const userResponse = user.toObject();
-    delete userResponse.password;
-    delete userResponse.mfaSecret;
+    // Prepare staff object for response (omitting sensitive fields)
+    const staffResponse = staff.toObject();
+    delete staffResponse.password;
+    delete staffResponse.mfaSecret;
 
-    return { user: userResponse, token };
+    return { staff: staffResponse, token };
   }
 
   /**
@@ -101,9 +101,9 @@ class SuperuserService {
    * @returns {Promise<object>}
    */
   async createSupportStaff(staffData, io) {
-    const staff = await User.create({ ...staffData, role: 'support_staff' });
+    const staff = await Staff.create({ ...staffData, role: 'support_staff' });
     io.emit('staffCreated', { staff });
-    return { user: staff };
+    return { staff: staff };
   }
 
   /**
@@ -114,9 +114,9 @@ class SuperuserService {
    * @returns {Promise<object>}
    */
   async updateSupportStaff(id, staffData, io) {
-    const staff = await User.findByIdAndUpdate(id, staffData, { new: true });
+    const staff = await Staff.findByIdAndUpdate(id, staffData, { new: true });
     io.emit('staffUpdated', { staff });
-    return { user: staff };
+    return { staff: staff };
   }
 
   /**
@@ -126,7 +126,7 @@ class SuperuserService {
    * @returns {Promise<void>}
    */
   async deleteSupportStaff(id, io) {
-    await User.findByIdAndDelete(id);
+    await Staff.findByIdAndDelete(id);
     io.emit('staffDeleted', { staffId: id });
   }
 
@@ -191,8 +191,8 @@ class SuperuserService {
       const rolesToUpdate = newPermission.roles.map(role => role.toLowerCase());
       const permissionNumber = newPermission.permissionNumber;
 
-      // Update all users whose role is in the rolesToUpdate array
-      await User.updateMany(
+      // Update all staff whose role is in the rolesToUpdate array
+      await Staff.updateMany(
         { role: { $in: rolesToUpdate } },
         { $addToSet: { permissions: permissionNumber } }
       );
