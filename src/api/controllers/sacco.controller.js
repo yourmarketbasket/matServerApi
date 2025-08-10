@@ -7,7 +7,7 @@ const SaccoService = require('../services/sacco.service');
 class SaccoController {
   async createSacco(req, res, next) {
     try {
-      req.body.createdBy = req.staff.id;
+      req.body.createdBy = req.user.id;
       const result = await SaccoService.createSacco(req.body, req.io);
       res.status(201).json({ success: true, data: result });
     } catch (error) {

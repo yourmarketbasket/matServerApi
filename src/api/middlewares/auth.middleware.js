@@ -1,10 +1,25 @@
 const jwt = require('jsonwebtoken');
 const config = require('../../config');
 const Staff = require('../models/staff.model');
+const Passenger = require('../models/passenger.model');
+// Import other user type models as they are created
+// const Driver = require('../models/driver.model');
+// const Sacco = require('../models/sacco.model');
+// const Owner = require('../models/owner.model');
+// const QueueManager = require('../models/queueManager.model');
+
+const userModels = {
+  staff: Staff,
+  passenger: Passenger,
+  // driver: Driver,
+  // sacco: Sacco,
+  // owner: Owner,
+  // queueManager: QueueManager,
+};
 
 /**
  * @description Middleware to protect routes by verifying a JWT.
- * It assumes the token is sent in the 'Authorization' header as a Bearer token.
+ * It is polymorphic and can handle different user types.
  */
 const protect = async (req, res, next) => {
   let token;
@@ -23,18 +38,27 @@ const protect = async (req, res, next) => {
   try {
     // Verify token
     const decoded = jwt.verify(token, config.jwtSecret);
+    const { id, userType } = decoded;
 
-    // Attach staff member to the request object
-    req.staff = await Staff.findById(decoded.id).select('-password');
-
-    if (!req.staff) {
-        return res.status(401).json({ success: false, message: 'Not authorized, staff member not found' });
+    if (!userType || !userModels[userType]) {
+      return res.status(401).json({ success: false, message: 'Invalid token: unknown user type' });
     }
 
-    // Check if the token was issued before the staff member's `tokenValidAfter` timestamp
-    if (req.staff.tokenValidAfter) {
+    const UserModel = userModels[userType];
+    const user = await UserModel.findById(id).select('-password');
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Not authorized, user not found' });
+    }
+
+    // Attach user object and userType to the request for downstream middleware/controllers
+    req.user = user;
+    req.userType = userType;
+
+    // Check if the token was issued before the user's `tokenValidAfter` timestamp
+    if (req.user.tokenValidAfter) {
       const tokenIssuedAt = decoded.iat * 1000;
-      if (tokenIssuedAt < req.staff.tokenValidAfter.getTime()) {
+      if (tokenIssuedAt < req.user.tokenValidAfter.getTime()) {
         return res.status(401).json({ success: false, message: 'Token has been invalidated, please log in again.' });
       }
     }

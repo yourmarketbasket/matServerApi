@@ -1,0 +1,155 @@
+const Staff = require('../models/staff.model');
+
+/**
+ * @class UserManagementService
+ * @description Handles user management logic (for Staff).
+ */
+class UserManagementService {
+  /**
+   * @description Get all users (staff)
+   * @returns {Promise<object[]>} A list of all users
+   */
+  async getUsers() {
+    const users = await Staff.find();
+    return users;
+  }
+
+  /**
+   * @description Get a single user by their ID
+   * @param {string} userId - The ID of the user to retrieve
+   * @returns {Promise<object>} The user object
+   */
+  async getUserById(userId) {
+    const user = await Staff.findById(userId);
+    if (!user) {
+      throw new Error('User not found.');
+    }
+    return user;
+  }
+
+  /**
+   * @description Updates a user's approval status
+   * @param {string} userId - The ID of the user to update
+   * @param {string} status - The new status
+   * @returns {Promise<object>} The updated user object
+   */
+  async updateUserStatus(userId, status) {
+    const validStatuses = ['pending', 'approved', 'suspended', 'blocked'];
+    if (!validStatuses.includes(status)) {
+      throw new Error('Invalid status provided.');
+    }
+    const user = await Staff.findByIdAndUpdate(
+      userId,
+      { approvedStatus: status },
+      { new: true, runValidators: true }
+    );
+    if (!user) {
+      throw new Error('User not found.');
+    }
+    return user;
+  }
+
+  /**
+   * @description Updates a user's rank
+   * @param {string} userId - The ID of the user to update
+   * @param {string} rank - The new rank
+   * @returns {Promise<object>} The updated user object
+   */
+  async updateUserRank(userId, rank) {
+    const user = await Staff.findByIdAndUpdate(
+      userId,
+      { rank },
+      { new: true, runValidators: true }
+    );
+    if (!user) {
+      throw new Error('User not found.');
+    }
+    return user;
+  }
+
+  /**
+   * @description Adds one or more permissions to a user.
+   * @param {string} userId - The ID of the user to update.
+   * @param {string|string[]} permissions - The permission or permissions to add.
+   * @returns {Promise<object>} The updated user object.
+   */
+  async addUserPermissions(userId, permissions) {
+    const user = await Staff.findById(userId);
+    if (!user) {
+      throw new Error('User not found.');
+    }
+
+    const permissionsToAdd = Array.isArray(permissions) ? permissions : [permissions];
+    const newPermissions = [];
+
+    for (const p of permissionsToAdd) {
+      if (!user.permissions.includes(p) && !newPermissions.includes(p)) {
+        newPermissions.push(p);
+      }
+    }
+
+    if (newPermissions.length === 0) {
+      return user;
+    }
+
+    user.permissions.push(...newPermissions);
+    await user.save();
+    return user;
+  }
+
+  /**
+   * @description Removes a permission from a user
+   * @param {string} userId - The ID of the user to update
+   * @param {string} permission - The permission to remove
+   * @returns {Promise<object>} The updated user object
+   */
+  async removeUserPermission(userId, permission) {
+    const user = await Staff.findByIdAndUpdate(
+      userId,
+      { $pull: { permissions: permission } },
+      { new: true }
+    );
+    if (!user) {
+      throw new Error('User not found.');
+    }
+    return user;
+  }
+
+  /**
+   * @description Get all admin users
+   * @returns {Promise<object[]>} A list of all admin users
+   */
+  async getAdminUsers() {
+    const adminRanks = [
+      'CEO',
+      'CFO',
+      'COO',
+      'CTO',
+      'VP',
+      'Director',
+      'Manager',
+      'Supervisor',
+    ];
+    const adminUsers = await Staff.find({ rank: { $in: adminRanks } });
+    return adminUsers;
+  }
+
+  /**
+   * @description Initiates a remote logout for a user by invalidating all their existing tokens.
+   * @param {string} userId - The ID of the user to log out.
+   * @returns {Promise<{success: boolean, message: string}>}
+   */
+  async remoteLogout(userId) {
+    const user = await Staff.findById(userId);
+    if (!user) {
+      throw new Error('User not found.');
+    }
+
+    user.tokenValidAfter = new Date();
+    await user.save();
+
+    return { success: true, message: `Successfully initiated remote logout for user ${user.name}.` };
+  }
+}
+
+module.exports = new UserManagementService();

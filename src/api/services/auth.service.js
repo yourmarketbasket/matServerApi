@@ -80,7 +80,7 @@ class AuthService {
     }
 
     // Generate JWT
-    const token = generateToken(staff);
+    const token = generateToken(staff, 'staff');
 
     // Prepare staff object for response (omitting sensitive fields)
     const staffResponse = staff.toObject();
@@ -89,7 +89,7 @@ class AuthService {
     delete staffResponse.failedLoginAttempts;
     delete staffResponse.lockUntil;
 
-    return { staff: staffResponse, token };
+    return { user: staffResponse, token };
   }
 
   /**

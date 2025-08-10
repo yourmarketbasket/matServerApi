@@ -84,14 +84,14 @@ class SuperuserService {
     }
 
     // 3. Generate JWT
-    const token = generateToken(staff);
+    const token = generateToken(staff, 'staff');
 
     // Prepare staff object for response (omitting sensitive fields)
     const staffResponse = staff.toObject();
     delete staffResponse.password;
     delete staffResponse.mfaSecret;
 
-    return { staff: staffResponse, token };
+    return { user: staffResponse, token };
   }
 
   /**

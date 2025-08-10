@@ -11,7 +11,7 @@ const canViewSaccoAnalytics = authorize('sacco', 'support_staff', 'superuser');
 const canViewOwnerAnalytics = authorize('owner', 'sacco', 'support_staff', 'superuser');
 // A user should only be able to see their own loyalty usage
 const canViewOwnLoyalty = (req, res, next) => {
-    if (req.staff.id === req.params.userId || ['admin', 'superuser'].includes(req.staff.role)) {
+    if (req.user.id === req.params.userId || ['admin', 'superuser'].includes(req.user.role)) {
         return next();
     }
     return res.status(403).json({ success: false, message: 'Forbidden' });

@@ -7,7 +7,7 @@ const SupportService = require('../services/support.service');
 class SupportController {
   async createTicket(req, res, next) {
     try {
-      req.body.raisedBy = req.staff._id;
+      req.body.raisedBy = req.user._id;
       const ticket = await SupportService.createTicket(req.body, req.io);
       res.status(201).json({ success: true, data: ticket });
     } catch (error) {
@@ -17,7 +17,7 @@ class SupportController {
 
   async getTickets(req, res, next) {
     try {
-      const tickets = await SupportService.getTickets(req.staff);
+      const tickets = await SupportService.getTickets(req.user);
       res.status(200).json({ success: true, data: tickets });
     } catch (error) {
       next(error);
