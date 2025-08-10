@@ -74,6 +74,13 @@ const UserSchema = new mongoose.Schema({
   mfaSecret: {
     type: String,
   },
+  failedLoginAttempts: {
+    type: Number,
+    default: 0,
+  },
+  lockUntil: {
+    type: Date,
+  },
   passwordResetToken: String,
   passwordResetExpire: Date,
   tokenValidAfter: Date,

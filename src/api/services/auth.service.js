@@ -22,36 +22,55 @@ class AuthService {
    * @returns {Promise<{user: object, token: string}>}
    */
   async login(emailOrPhone, password, mfaCode) {
-    // 1. Find user by email or phone
     const user = await User.findOne({
       $or: [{ email: emailOrPhone }, { phone: emailOrPhone }],
-    }).select('+password');
+    }).select('+password +failedLoginAttempts +lockUntil');
 
     if (!user) {
+      // We throw a generic error to prevent attackers from guessing which usernames are valid.
       throw new Error('Invalid credentials');
     }
 
-    // 2. Check if user is approved
+    // Check if the account is currently locked.
+    if (user.lockUntil && user.lockUntil > Date.now()) {
+      const remainingMinutes = Math.ceil((user.lockUntil - Date.now()) / 60000);
+      throw new Error(`Account is locked due to too many failed login attempts. Please try again in ${remainingMinutes} minutes.`);
+    }
+
+    // Check if user is approved
     if (user.approvedStatus !== 'approved') {
       throw new Error(`Your account is currently ${user.approvedStatus}. Please contact support.`);
     }
 
-    // 3. Check if the user is a superuser
+    // Prevent superuser login through this general portal
     if (user.role === 'superuser') {
       throw new Error('Superuser login is not allowed here.');
     }
 
-    // 4. Check if password matches
+    // Check if password matches
     const isMatch = await user.matchPassword(password);
 
     if (!isMatch) {
+      user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+      if (user.failedLoginAttempts >= 3) {
+        const fiveHours = 5 * 60 * 60 * 1000;
+        user.lockUntil = new Date(Date.now() + fiveHours);
+        user.failedLoginAttempts = 0; // Reset counter after locking
+      }
+      await user.save();
       throw new Error('Invalid credentials');
     }
 
-    // 3. Check MFA if enabled
+    // If login is successful, reset failed attempts and unlock account if it was locked.
+    if (user.failedLoginAttempts > 0 || user.lockUntil) {
+      user.failedLoginAttempts = 0;
+      user.lockUntil = null;
+      await user.save();
+    }
+
+    // Check MFA if enabled
     if (user.mfaSecret) {
       if (!mfaCode) {
-        // This is a special return case to signal the frontend to prompt for MFA
         return { mfaRequired: true, userId: user._id };
       }
       const isMfaValid = verifyMfaToken(user.mfaSecret, mfaCode);
@@ -60,14 +79,17 @@ class AuthService {
       }
     }
 
-    // 4. Generate JWT
+    // Generate JWT
     const token = generateToken(user._id);
 
-    // Don't return password or mfaSecret
-    user.password = undefined;
-    user.mfaSecret = undefined;
+    // Prepare user object for response (omitting sensitive fields)
+    const userResponse = user.toObject();
+    delete userResponse.password;
+    delete userResponse.mfaSecret;
+    delete userResponse.failedLoginAttempts;
+    delete userResponse.lockUntil;
 
-    return { user, token };
+    return { user: userResponse, token };
   }
 
   /**
