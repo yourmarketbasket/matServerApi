@@ -29,6 +29,11 @@ const baseSchema = new mongoose.Schema({
     minlength: 6,
     select: false,
   },
+  role: {
+    type: String,
+    enum: ['Driver', 'Passenger', 'Sacco', 'QueueManager', 'Owner', 'Superuser'],
+    required: true,
+  },
   permissions: {
     type: [String],
     default: [],

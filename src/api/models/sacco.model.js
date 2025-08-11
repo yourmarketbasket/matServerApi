@@ -6,19 +6,37 @@ const saccoSchema = baseSchema.clone();
 
 // Add fields specific to Saccos
 saccoSchema.add({
-  license: {
+  registrationNumber: {
     type: String,
-    required: [true, 'Please provide a license number'],
+    required: [true, 'Registration number is required'],
     unique: true,
   },
-  contactPerson: {
+  byLawsDocument: {
     type: String,
-    required: [true, 'Please provide a contact person'],
+    required: [true, 'By-laws document is required'],
   },
-  ntsaCompliance: {
-    type: Boolean,
-    default: false,
+  leadershipInfoDocument: {
+    type: String,
+    required: [true, 'Leadership info document is required'],
+  },
+  registrationFeePaymentProof: {
+    type: String,
+    required: [true, 'Registration fee payment proof is required'],
+  },
+  membershipDetailsDocument: {
+    type: String,
+  },
+  economicAppraisalDocument: {
+    type: String,
+  },
+  transportSpecificAdditionsDocument: {
+    type: String,
   },
 });
+
+// Remove irrelevant fields from the base schema for Saccos
+saccoSchema.remove('dob');
+saccoSchema.remove('gender');
+
 
 module.exports = mongoose.model('Sacco', saccoSchema);

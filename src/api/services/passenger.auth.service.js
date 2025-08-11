@@ -19,7 +19,7 @@ class PassengerAuthService {
    * @returns {Promise<{passenger: object}>}
    */
   static async signup(passengerData, io) {
-    const { name, email, phone, password, verifiedToken } = passengerData;
+    const { name, email, phone, password, verifiedToken, dob } = passengerData;
 
     if (!verifiedToken) {
       throw new Error('Verification token is required.');
@@ -43,6 +43,8 @@ class PassengerAuthService {
       email,
       phone,
       password,
+      dob,
+      role: 'Passenger',
       permissions,
       approvedStatus: 'approved', // Passengers are auto-approved
       verified: { email: true, phone: false },

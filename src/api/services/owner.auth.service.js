@@ -16,7 +16,16 @@ class OwnerAuthService {
    * @description Registers a new owner after OTP verification.
    */
   static async signup(ownerData, io) {
-    const { name, email, phone, password, verifiedToken } = ownerData;
+    const {
+      name,
+      email,
+      phone,
+      password,
+      verifiedToken,
+      idNumberOrBusinessRegNo,
+      kraPinCertificate,
+      saccoAffiliation,
+    } = ownerData;
 
     if (!verifiedToken) throw new Error('Verification token is required.');
     jwt.verify(verifiedToken, config.jwtSecret);
@@ -31,6 +40,10 @@ class OwnerAuthService {
       email,
       phone,
       password,
+      role: 'Owner',
+      idNumberOrBusinessRegNo,
+      kraPinCertificate,
+      saccoAffiliation,
       permissions,
       verified: { email: true, phone: false },
     });

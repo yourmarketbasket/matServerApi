@@ -16,7 +16,22 @@ class DriverAuthService {
    * @description Registers a new driver after OTP verification.
    */
   static async signup(driverData, io) {
-    const { name, email, phone, password, licenseNumber, saccoId, verifiedToken } = driverData;
+    const {
+      name,
+      email,
+      phone,
+      password,
+      licenseNumber,
+      saccoId,
+      verifiedToken,
+      idNumber,
+      idPhotoFront,
+      idPhotoBack,
+      drivingLicenseExpiry,
+      drivingLicensePhoto,
+      dob,
+      gender,
+    } = driverData;
 
     if (!verifiedToken) throw new Error('Verification token is required.');
     jwt.verify(verifiedToken, config.jwtSecret);
@@ -31,8 +46,16 @@ class DriverAuthService {
       email,
       phone,
       password,
+      role: 'Driver',
       licenseNumber,
       saccoId,
+      idNumber,
+      idPhotoFront,
+      idPhotoBack,
+      drivingLicenseExpiry,
+      drivingLicensePhoto,
+      dob,
+      gender,
       permissions,
       verified: { email: true, phone: false },
     });

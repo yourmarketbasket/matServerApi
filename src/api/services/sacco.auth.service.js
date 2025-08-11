@@ -16,7 +16,18 @@ class SaccoAuthService {
    * @description Registers a new sacco after OTP verification.
    */
   static async signup(saccoData, io) {
-    const { name, email, phone, password, license, contactPerson, verifiedToken } = saccoData;
+    const {
+      name,
+      email,
+      phone,
+      password,
+      registrationNumber,
+      byLawsDocument,
+      leadershipInfoDocument,
+      registrationFeePaymentProof,
+      address,
+      verifiedToken,
+    } = saccoData;
 
     if (!verifiedToken) throw new Error('Verification token is required.');
     jwt.verify(verifiedToken, config.jwtSecret);
@@ -31,8 +42,12 @@ class SaccoAuthService {
       email,
       phone,
       password,
-      license,
-      contactPerson,
+      role: 'Sacco',
+      registrationNumber,
+      byLawsDocument,
+      leadershipInfoDocument,
+      registrationFeePaymentProof,
+      address,
       permissions,
       verified: { email: true, phone: false },
     });

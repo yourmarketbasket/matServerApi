@@ -16,7 +16,7 @@ class QueueManagerAuthService {
    * @description Registers a new queue manager after OTP verification.
    */
   static async signup(queueManagerData, io) {
-    const { name, email, phone, password, verifiedToken } = queueManagerData;
+    const { name, email, phone, password, verifiedToken, idNumber, drivingLicense, dob } = queueManagerData;
 
     if (!verifiedToken) throw new Error('Verification token is required.');
     jwt.verify(verifiedToken, config.jwtSecret);
@@ -31,6 +31,10 @@ class QueueManagerAuthService {
       email,
       phone,
       password,
+      idNumber,
+      drivingLicense,
+      dob,
+      role: 'QueueManager',
       permissions,
       verified: { email: true, phone: false },
     });
