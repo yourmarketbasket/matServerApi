@@ -1,3 +1,4 @@
+const AuthService = require('./auth.service');
 const Passenger = require('../models/passenger.model');
 const OTP = require('../models/otp.model');
 const bcrypt = require('bcryptjs');
@@ -28,10 +29,11 @@ class PassengerAuthService {
     // 1. Verify the token
     jwt.verify(verifiedToken, config.jwtSecret);
 
-    // 2. Check if passenger already exists
-    const passengerExists = await Passenger.findOne({ email });
-    if (passengerExists) {
-      throw new Error('Passenger with that email already exists.');
+    // 2. Check if email is already in use across all user collections
+    const authService = new AuthService();
+    const emailInUse = await authService.isEmailInUse(email);
+    if (emailInUse) {
+      throw new Error('Email is already in use.');
     }
 
     // 3. Get permissions for the 'passenger' role

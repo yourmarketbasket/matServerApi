@@ -4,9 +4,8 @@ const PassengerAuthController = require('../controllers/passenger.auth.controlle
 const PassengerController = require('../controllers/passenger.controller');
 const { protect } = require('../middlewares/auth.middleware');
 
-// Public routes for passenger signup and login
+// Public routes for passenger signup
 router.post('/signup', PassengerAuthController.signup);
-router.post('/login', PassengerAuthController.login);
 
 // --- Protected Routes ---
 

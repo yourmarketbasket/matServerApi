@@ -1,3 +1,4 @@
+const AuthService = require('./auth.service');
 const QueueManager = require('../models/queueManager.model');
 const OTP = require('../models/otp.model');
 const bcrypt = require('bcryptjs');
@@ -21,8 +22,11 @@ class QueueManagerAuthService {
     if (!verifiedToken) throw new Error('Verification token is required.');
     jwt.verify(verifiedToken, config.jwtSecret);
 
-    const queueManagerExists = await QueueManager.findOne({ email });
-    if (queueManagerExists) throw new Error('QueueManager with that email already exists.');
+    const authService = new AuthService();
+    const emailInUse = await authService.isEmailInUse(email);
+    if (emailInUse) {
+      throw new Error('Email is already in use.');
+    }
 
     const permissions = await getPermissionsForRole('Queue Manager');
 

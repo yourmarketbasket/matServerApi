@@ -1,4 +1,10 @@
+const Passenger = require('../models/passenger.model');
+const Sacco = require('../models/sacco.model');
+const Owner = require('../models/owner.model');
+const QueueManager = require('../models/queueManager.model');
+const Driver = require('../models/driver.model');
 const Staff = require('../models/staff.model');
+const Superuser = require('../models/superuser.model');
 const OTP = require('../models/otp.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -15,81 +21,96 @@ const config = require('../../config');
  */
 class AuthService {
   /**
-   * @description Authenticates a staff member
-   * @param {string} emailOrPhone - The staff member's email or phone
-   * @param {string} password - The staff member's password
-   * @param {string} [mfaCode] - The MFA code if required
-   * @returns {Promise<{staff: object, token: string}>}
+   * @description Checks if an email is already in use across all user collections.
+   * @param {string} email - The email to check.
+   * @returns {Promise<boolean>}
+   */
+  async isEmailInUse(email) {
+    const userModels = [Passenger, Sacco, Owner, QueueManager, Driver, Staff, Superuser];
+    for (const model of userModels) {
+      const user = await model.findOne({ email });
+      if (user) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * @description Authenticates a user from any collection.
+   * @param {string} emailOrPhone - The user's email or phone.
+   * @param {string} password - The user's password.
+   * @param {string} [mfaCode] - The MFA code if required for staff/superuser.
+   * @returns {Promise<{user: object, token: string}>}
    */
   async login(emailOrPhone, password, mfaCode) {
-    const staff = await Staff.findOne({
-      $or: [{ email: emailOrPhone }, { phone: emailOrPhone }],
-    }).select('+password +failedLoginAttempts +lockUntil');
+    const userModels = [Passenger, Sacco, Owner, QueueManager, Driver, Staff, Superuser];
 
-    if (!staff) {
-      // We throw a generic error to prevent attackers from guessing which usernames are valid.
+    let user = null;
+    let role = null;
+
+    for (const model of userModels) {
+      const foundUser = await model.findOne({
+        $or: [{ email: emailOrPhone }, { phone: emailOrPhone }],
+      }).select('+password +failedLoginAttempts +lockUntil +mfaSecret');
+
+      if (foundUser) {
+        user = foundUser;
+        role = model.modelName.toLowerCase();
+        break;
+      }
+    }
+
+    if (!user) {
       throw new Error('Invalid credentials');
     }
 
-    // Check if the account is currently locked.
-    if (staff.lockUntil && staff.lockUntil > Date.now()) {
-      const remainingMinutes = Math.ceil((staff.lockUntil - Date.now()) / 60000);
+    if (user.lockUntil && user.lockUntil > Date.now()) {
+      const remainingMinutes = Math.ceil((user.lockUntil - Date.now()) / 60000);
       throw new Error(`Account is locked due to too many failed login attempts. Please try again in ${remainingMinutes} minutes.`);
     }
 
-    // Check if staff member is approved
-    if (staff.approvedStatus !== 'approved') {
-      throw new Error(`Your account is currently ${staff.approvedStatus}. Please contact support.`);
+    if (user.approvedStatus !== 'approved') {
+      throw new Error(`Your account is currently ${user.approvedStatus}. Please contact support.`);
     }
 
-    // Prevent superuser login through this general portal
-    if (staff.role === 'superuser') {
-      throw new Error('Superuser login is not allowed here.');
-    }
-
-    // Check if password matches
-    const isMatch = await staff.matchPassword(password);
+    const isMatch = await user.matchPassword(password);
 
     if (!isMatch) {
-      staff.failedLoginAttempts = (staff.failedLoginAttempts || 0) + 1;
-      if (staff.failedLoginAttempts >= 3) {
-        const fiveHours = 5 * 60 * 60 * 1000;
-        staff.lockUntil = new Date(Date.now() + fiveHours);
-        staff.failedLoginAttempts = 0; // Reset counter after locking
+      user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+      if (user.failedLoginAttempts >= 3) {
+        user.lockUntil = new Date(Date.now() + 5 * 60 * 60 * 1000);
+        user.failedLoginAttempts = 0;
       }
-      await staff.save();
+      await user.save();
       throw new Error('Invalid credentials');
     }
 
-    // If login is successful, reset failed attempts and unlock account if it was locked.
-    if (staff.failedLoginAttempts > 0 || staff.lockUntil) {
-      staff.failedLoginAttempts = 0;
-      staff.lockUntil = null;
-      await staff.save();
+    if (user.failedLoginAttempts > 0 || user.lockUntil) {
+      user.failedLoginAttempts = 0;
+      user.lockUntil = null;
+      await user.save();
     }
 
-    // Check MFA if enabled
-    if (staff.mfaSecret) {
+    if (user.mfaSecret) {
       if (!mfaCode) {
-        return { mfaRequired: true, userId: staff._id };
+        return { mfaRequired: true, userId: user._id };
       }
-      const isMfaValid = verifyMfaToken(staff.mfaSecret, mfaCode);
+      const isMfaValid = verifyMfaToken(user.mfaSecret, mfaCode);
       if (!isMfaValid) {
         throw new Error('Invalid MFA code');
       }
     }
 
-    // Generate JWT
-    const token = generateToken(staff, 'staff');
+    const token = generateToken(user, role);
 
-    // Prepare staff object for response (omitting sensitive fields)
-    const staffResponse = staff.toObject();
-    delete staffResponse.password;
-    delete staffResponse.mfaSecret;
-    delete staffResponse.failedLoginAttempts;
-    delete staffResponse.lockUntil;
+    const userResponse = user.toObject();
+    delete userResponse.password;
+    delete userResponse.mfaSecret;
+    delete userResponse.failedLoginAttempts;
+    delete userResponse.lockUntil;
 
-    return { user: staffResponse, token };
+    return { user: userResponse, token };
   }
 
   /**

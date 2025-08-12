@@ -1,3 +1,4 @@
+const AuthService = require('./auth.service');
 const Owner = require('../models/owner.model');
 const OTP = require('../models/otp.model');
 const bcrypt = require('bcryptjs');
@@ -30,8 +31,11 @@ class OwnerAuthService {
     if (!verifiedToken) throw new Error('Verification token is required.');
     jwt.verify(verifiedToken, config.jwtSecret);
 
-    const ownerExists = await Owner.findOne({ email });
-    if (ownerExists) throw new Error('Owner with that email already exists.');
+    const authService = new AuthService();
+    const emailInUse = await authService.isEmailInUse(email);
+    if (emailInUse) {
+      throw new Error('Email is already in use.');
+    }
 
     const permissions = await getPermissionsForRole('Owner');
 

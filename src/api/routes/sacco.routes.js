@@ -5,9 +5,8 @@ const SaccoAuthController = require('../controllers/sacco.auth.controller');
 const { protect } = require('../middlewares/auth.middleware');
 const { authorize } = require('../middlewares/rbac.middleware');
 
-// Public routes for Sacco signup and login
+// Public routes for Sacco signup
 router.post('/signup', SaccoAuthController.signup);
-router.post('/login', SaccoAuthController.login);
 
 
 // Protected Sacco routes

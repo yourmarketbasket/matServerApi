@@ -2,7 +2,76 @@
 
 This document provides detailed information about the signup and login process for different user roles in the system.
 
-## Passenger
+**Note on Email Uniqueness:** All user emails must be unique across the entire system, regardless of their role. The system will prevent a new user from signing up if their email is already in use by any other user.
+
+## Universal Login
+
+Logs in any user and returns a JWT token.
+
+- **Endpoint:** `POST /api/v1/auth/login`
+- **Method:** `POST`
+- **Authentication:** Public
+
+### Payload
+
+| Field        | Type   | Required | Description                                    |
+| ------------ | ------ | -------- | ---------------------------------------------- |
+| `emailOrPhone` | string | Yes      | The user's email address or phone number.      |
+| `password`   | string | Yes      | The user's password.                           |
+| `mfaCode`    | string | No       | The MFA code, if required for the user.        |
+
+### Success Response (200 OK)
+
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "_id": "user_id",
+      "name": "User Name",
+      "email": "user@example.com",
+      "role": "Passenger"
+    },
+    "token": "your_jwt_token"
+  }
+}
+```
+
+### Failure Responses
+
+- **401 Unauthorized**
+
+  If the credentials are invalid:
+  ```json
+  {
+    "success": false,
+    "message": "Invalid credentials"
+  }
+  ```
+
+- **401 Unauthorized**
+
+  If the account is not approved:
+  ```json
+  {
+    "success": false,
+    "message": "Your account is currently pending. Please contact support."
+  }
+  ```
+
+- **401 Unauthorized**
+
+  If the account is locked:
+  ```json
+  {
+    "success": false,
+    "message": "Account is locked due to too many failed login attempts. Please try again in 5 minutes."
+  }
+  ```
+
+---
+
+## Signup Endpoints
 
 ### Passenger Signup
 
@@ -75,59 +144,6 @@ Creates a new passenger account.
   }
   ```
 
-### Passenger Login
-
-Logs in a passenger and returns a JWT token.
-
-- **Endpoint:** `POST /api/v1/passengers/login`
-- **Method:** `POST`
-- **Authentication:** Public
-
-#### Payload
-
-| Field        | Type   | Required | Description                                    |
-| ------------ | ------ | -------- | ---------------------------------------------- |
-| `emailOrPhone` | string | Yes      | The passenger's email address or phone number. |
-| `password`   | string | Yes      | The passenger's password.                      |
-
-#### Success Response (200 OK)
-
-```json
-{
-  "success": true,
-  "data": {
-    "passenger": {
-      "_id": "passenger_id",
-      "name": "Passenger Name",
-      "email": "passenger@example.com",
-      "role": "Passenger"
-    },
-    "token": "your_jwt_token"
-  }
-}
-```
-
-#### Failure Responses
-
-- **401 Unauthorized**
-
-  If the credentials are invalid:
-  ```json
-  {
-    "success": false,
-    "message": "Invalid credentials"
-  }
-  ```
-
-- **401 Unauthorized**
-
-  If the account is locked:
-  ```json
-  {
-    "success": false,
-    "message": "Account is locked due to too many failed login attempts. Please try again in 5 minutes."
-  }
-  ```
 
 ---
 
@@ -195,69 +211,6 @@ Registers a new Sacco. The Sacco account will be pending review until approved b
   }
   ```
 
-### Sacco Login
-
-Logs in a Sacco and returns a JWT token.
-
-- **Endpoint:** `POST /api/v1/saccos/login`
-- **Method:** `POST`
-- **Authentication:** Public
-
-#### Payload
-
-| Field        | Type   | Required | Description                                  |
-| ------------ | ------ | -------- | -------------------------------------------- |
-| `emailOrPhone` | string | Yes      | The Sacco's email address or phone number.   |
-| `password`   | string | Yes      | The Sacco's password.                        |
-
-#### Success Response (200 OK)
-
-```json
-{
-  "success": true,
-  "data": {
-    "sacco": {
-      "_id": "sacco_id",
-      "name": "Sacco Name",
-      "email": "sacco@example.com",
-      "role": "Sacco"
-    },
-    "token": "your_jwt_token"
-  }
-}
-```
-
-#### Failure Responses
-
-- **401 Unauthorized**
-
-  If the credentials are invalid:
-  ```json
-  {
-    "success": false,
-    "message": "Invalid credentials"
-  }
-  ```
-
-- **401 Unauthorized**
-
-  If the account is not approved:
-  ```json
-  {
-    "success": false,
-    "message": "Your account is currently pending. Please contact support."
-  }
-  ```
-
-- **401 Unauthorized**
-
-  If the account is locked:
-  ```json
-  {
-    "success": false,
-    "message": "Account is locked. Please try again in 5 minutes."
-  }
-  ```
 
 ---
 
@@ -323,69 +276,6 @@ Registers a new vehicle owner. The owner account will be pending review until ap
   }
   ```
 
-### Owner Login
-
-Logs in an owner and returns a JWT token.
-
-- **Endpoint:** `POST /api/v1/owners/login`
-- **Method:** `POST`
-- **Authentication:** Public
-
-#### Payload
-
-| Field        | Type   | Required | Description                                  |
-| ------------ | ------ | -------- | -------------------------------------------- |
-| `emailOrPhone` | string | Yes      | The owner's email address or phone number.   |
-| `password`   | string | Yes      | The owner's password.                        |
-
-#### Success Response (200 OK)
-
-```json
-{
-  "success": true,
-  "data": {
-    "owner": {
-      "_id": "owner_id",
-      "name": "Owner Name",
-      "email": "owner@example.com",
-      "role": "Owner"
-    },
-    "token": "your_jwt_token"
-  }
-}
-```
-
-#### Failure Responses
-
-- **401 Unauthorized**
-
-  If the credentials are invalid:
-  ```json
-  {
-    "success": false,
-    "message": "Invalid credentials"
-  }
-  ```
-
-- **401 Unauthorized**
-
-  If the account is not approved:
-  ```json
-  {
-    "success": false,
-    "message": "Your account is currently pending. Please contact support."
-  }
-  ```
-
-- **401 Unauthorized**
-
-  If the account is locked:
-  ```json
-  {
-    "success": false,
-    "message": "Account is locked. Please try again in 5 minutes."
-  }
-  ```
 
 ---
 
@@ -451,69 +341,6 @@ Registers a new queue manager. The queue manager account will be pending review 
   }
   ```
 
-### Queue Manager Login
-
-Logs in a queue manager and returns a JWT token.
-
-- **Endpoint:** `POST /api/v1/queue-managers/login`
-- **Method:** `POST`
-- **Authentication:** Public
-
-#### Payload
-
-| Field        | Type   | Required | Description                                          |
-| ------------ | ------ | -------- | ---------------------------------------------------- |
-| `emailOrPhone` | string | Yes      | The queue manager's email address or phone number.   |
-| `password`   | string | Yes      | The queue manager's password.                        |
-
-#### Success Response (200 OK)
-
-```json
-{
-  "success": true,
-  "data": {
-    "queueManager": {
-      "_id": "queueManager_id",
-      "name": "Queue Manager Name",
-      "email": "queuemanager@example.com",
-      "role": "QueueManager"
-    },
-    "token": "your_jwt_token"
-  }
-}
-```
-
-#### Failure Responses
-
-- **401 Unauthorized**
-
-  If the credentials are invalid:
-  ```json
-  {
-    "success": false,
-    "message": "Invalid credentials"
-  }
-  ```
-
-- **401 Unauthorized**
-
-  If the account is not approved:
-  ```json
-  {
-    "success": false,
-    "message": "Your account is currently pending. Please contact support."
-  }
-  ```
-
-- **401 Unauthorized**
-
-  If the account is locked:
-  ```json
-  {
-    "success": false,
-    "message": "Account is locked. Please try again in 5 minutes."
-  }
-  ```
 
 ---
 
@@ -582,69 +409,5 @@ Registers a new driver. The driver account will be pending review until approved
   {
     "success": false,
     "message": "Driver with that email already exists."
-  }
-  ```
-
-### Driver Login
-
-Logs in a driver and returns a JWT token.
-
-- **Endpoint:** `POST /api/v1/drivers/login`
-- **Method:** `POST`
-- **Authentication:** Public
-
-#### Payload
-
-| Field        | Type   | Required | Description                                  |
-| ------------ | ------ | -------- | -------------------------------------------- |
-| `emailOrPhone` | string | Yes      | The driver's email address or phone number.  |
-| `password`   | string | Yes      | The driver's password.                       |
-
-#### Success Response (200 OK)
-
-```json
-{
-  "success": true,
-  "data": {
-    "driver": {
-      "_id": "driver_id",
-      "name": "Driver Name",
-      "email": "driver@example.com",
-      "role": "Driver"
-    },
-    "token": "your_jwt_token"
-  }
-}
-```
-
-#### Failure Responses
-
-- **401 Unauthorized**
-
-  If the credentials are invalid:
-  ```json
-  {
-    "success": false,
-    "message": "Invalid credentials"
-  }
-  ```
-
-- **401 Unauthorized**
-
-  If the account is not approved:
-  ```json
-  {
-    "success": false,
-    "message": "Your account is currently pending. Please contact support."
-  }
-  ```
-
-- **401 Unauthorized**
-
-  If the account is locked:
-  ```json
-  {
-    "success": false,
-    "message": "Account is locked. Please try again in 5 minutes."
   }
   ```

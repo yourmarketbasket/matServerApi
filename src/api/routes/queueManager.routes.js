@@ -3,9 +3,8 @@ const router = express.Router();
 const QueueManagerController = require('../controllers/queueManager.controller');
 const QueueManagerAuthController = require('../controllers/queueManager.auth.controller');
 
-// Public routes for QueueManager signup and login
+// Public routes for QueueManager signup
 router.post('/signup', QueueManagerAuthController.signup);
-router.post('/login', QueueManagerAuthController.login);
 
 const { protect } = require('../middlewares/auth.middleware');
 const { authorize } = require('../middlewares/rbac.middleware');
