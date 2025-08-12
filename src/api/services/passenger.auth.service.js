@@ -30,8 +30,7 @@ class PassengerAuthService {
     jwt.verify(verifiedToken, config.jwtSecret);
 
     // 2. Check if email is already in use across all user collections
-    const authService = new AuthService();
-    const emailInUse = await authService.isEmailInUse(email);
+    const emailInUse = await AuthService.isEmailInUse(email);
     if (emailInUse) {
       throw new Error('Email is already in use.');
     }

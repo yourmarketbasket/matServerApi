@@ -31,8 +31,7 @@ class OwnerAuthService {
     if (!verifiedToken) throw new Error('Verification token is required.');
     jwt.verify(verifiedToken, config.jwtSecret);
 
-    const authService = new AuthService();
-    const emailInUse = await authService.isEmailInUse(email);
+    const emailInUse = await AuthService.isEmailInUse(email);
     if (emailInUse) {
       throw new Error('Email is already in use.');
     }
