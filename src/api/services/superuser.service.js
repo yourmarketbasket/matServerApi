@@ -1,3 +1,4 @@
+const Superuser = require('../models/superuser.model');
 const Staff = require('../models/staff.model');
 const Permission = require('../models/permission.model');
 const { generateToken } = require('../utils/jwt.util');
@@ -24,26 +25,23 @@ class SuperuserService {
     }
 
     // 2. Check if a superuser already exists
-    const superuserExists = await Staff.findOne({ role: 'superuser' });
+    const superuserExists = await Superuser.findOne({ email: userData.email });
     if (superuserExists) {
-      throw new Error('A superuser already exists. Cannot register another.');
+      throw new Error('A superuser with that email already exists.');
     }
 
     const { name, email, phone, password } = userData;
 
     // 3. Get all permissions for the superuser
-    const allPermissions = await getPermissionsForRole('superuser');
+    const allPermissions = await getPermissionsForRole('Superuser');
 
     // 4. Create a new user instance
-    const superuser = new Staff({
+    const superuser = new Superuser({
       name,
       email,
       phone,
       password,
-      role: 'superuser',
-      approvedStatus: 'approved',
       permissions: allPermissions,
-      verified: { email: true, phone: false }, // Superuser is created via a trusted process
     });
 
     // 5. Save the new superuser
@@ -67,31 +65,30 @@ class SuperuserService {
    */
   async loginSuperuser(emailOrPhone, password, mfaCode) {
     // 1. Find user by email or phone
-    const staff = await Staff.findOne({
+    const superuser = await Superuser.findOne({
       $or: [{ email: emailOrPhone }, { phone: emailOrPhone }],
-      role: 'superuser',
     }).select('+password');
 
-    if (!staff) {
+    if (!superuser) {
       throw new Error('Invalid credentials or not a superuser.');
     }
 
     // 2. Check if password matches
-    const isMatch = await staff.matchPassword(password);
+    const isMatch = await superuser.matchPassword(password);
 
     if (!isMatch) {
       throw new Error('Invalid credentials');
     }
 
     // 3. Generate JWT
-    const token = generateToken(staff, 'staff');
+    const token = generateToken(superuser, 'superuser');
 
-    // Prepare staff object for response (omitting sensitive fields)
-    const staffResponse = staff.toObject();
-    delete staffResponse.password;
-    delete staffResponse.mfaSecret;
+    // Prepare superuser object for response (omitting sensitive fields)
+    const superuserResponse = superuser.toObject();
+    delete superuserResponse.password;
+    delete superuserResponse.mfaSecret;
 
-    return { user: staffResponse, token };
+    return { user: superuserResponse, token };
   }
 
   /**
