@@ -43,6 +43,16 @@ Creates a new passenger account.
 }
 ```
 
+**Address Object Example:**
+```json
+{
+  "fullAddress": "123 Main Street",
+  "city": "Nairobi",
+  "postalCode": "00100",
+  "country": "Kenya"
+}
+```
+
 #### Failure Responses
 
 - **400 Bad Request**
@@ -143,7 +153,7 @@ Registers a new Sacco. The Sacco account will be pending review until approved b
 | `byLawsDocument`              | string | Yes      | A URL to the Sacco's bylaws document.                        |
 | `leadershipInfoDocument`      | string | Yes      | A URL to a document with information about the Sacco's leadership. |
 | `registrationFeePaymentProof` | string | Yes      | A URL to the proof of payment for the registration fee.      |
-| `address`                     | object | Yes      | The Sacco's physical address.                                |
+| `address`                     | object | Yes      | The Sacco's physical address. See example below.             |
 | `verifiedToken`               | string | Yes      | A JWT token obtained after successful OTP verification.      |
 
 #### Success Response (201 Created)

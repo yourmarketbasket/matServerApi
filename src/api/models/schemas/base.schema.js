@@ -39,7 +39,18 @@ const baseSchema = new mongoose.Schema({
     default: [],
   },
   address: {
-    type: String,
+    fullAddress: {
+      type: String,
+    },
+    city: {
+      type: String,
+    },
+    postalCode: {
+      type: String,
+    },
+    country: {
+      type: String,
+    },
   },
   dob: {
     type: Date,
