@@ -4,7 +4,8 @@ const config = require('../config');
 const connectDB = async () => {
   try {
     // Mongoose 6+ no longer needs useNewUrlParser, useUnifiedTopology, etc.
-    const conn = await mongoose.connect(config.mongodbUri);
+    // Set autoIndex to false to prevent Mongoose from creating collections on startup.
+    const conn = await mongoose.connect(config.mongodbUri, { autoIndex: false });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`MongoDB Connection Error: ${error.message}`);
