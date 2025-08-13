@@ -55,6 +55,20 @@ class SaccoService {
   }
 
   /**
+   * @description Updates a Sacco's approval status
+   * @param {string} id - The ID of the Sacco to update
+   * @param {string} status - The new approval status
+   * @param {object} io - The Socket.IO instance
+   * @returns {Promise<object>}
+   */
+  async updateSaccoStatus(id, status, io) {
+    const sacco = await Sacco.findByIdAndUpdate(id, { approvedStatus: status }, { new: true });
+    // In a real app, you might want to send a notification to the Sacco
+    io.emit('saccoStatusChanged', { saccoId: id, status });
+    return { sacco };
+  }
+
+  /**
    * @description Retrieves all Saccos
    * @returns {Promise<Array<object>>}
    */

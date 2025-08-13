@@ -20,6 +20,7 @@ router.post('/', protect, authorize('P023'), SaccoController.createSacco);
 router.put('/:id', protect, authorize('P024'), SaccoController.updateSacco);
 router.put('/:id/approve', protect, authorize('P026'), SaccoController.approveSacco);
 router.put('/:id/reject', protect, authorize('P027'), SaccoController.rejectSacco);
+router.put('/:id/status', protect, authorize('P024'), SaccoController.updateSaccoStatus);
 router.delete('/:id', protect, authorize('P025'), SaccoController.deleteSacco);
 
 
