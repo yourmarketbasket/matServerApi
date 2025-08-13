@@ -45,53 +45,73 @@ class AuthService {
    */
   async login(emailOrPhone, password, mfaCode) {
     const userModels = [Passenger, Sacco, Owner, QueueManager, Driver, Staff, Superuser];
+    const potentialUsers = [];
 
-    let user = null;
-    let role = null;
-
+    // 1. Find all potential user accounts across all roles
     for (const model of userModels) {
       const foundUser = await model.findOne({
         $or: [{ email: emailOrPhone }, { phone: emailOrPhone }],
       }).select('+password +failedLoginAttempts +lockUntil +mfaSecret');
 
       if (foundUser) {
-        user = foundUser;
-        role = model.modelName.toLowerCase();
+        potentialUsers.push(foundUser);
+      }
+    }
+
+    if (potentialUsers.length === 0) {
+      throw new Error('Invalid credentials');
+    }
+
+    // 2. Find the user with the matching password
+    let authenticatedUser = null;
+    let role = null;
+
+    for (const user of potentialUsers) {
+      const isMatch = await user.matchPassword(password);
+      if (isMatch) {
+        // Found the correct user
+        authenticatedUser = user;
+        role = user.constructor.modelName.toLowerCase();
         break;
       }
     }
 
-    if (!user) {
+    // 3. Handle failed authentication
+    if (!authenticatedUser) {
+      // Increment failed login attempts for all potential users with the same email/phone
+      for (const user of potentialUsers) {
+        user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+        if (user.failedLoginAttempts >= 3) {
+          user.lockUntil = new Date(Date.now() + 5 * 60 * 60 * 1000);
+          user.failedLoginAttempts = 0; // Reset after locking
+        }
+        await user.save();
+      }
       throw new Error('Invalid credentials');
     }
 
+    // 4. Proceed with the authenticated user
+    const user = authenticatedUser;
+
+    // Check for account lock on the authenticated user
     if (user.lockUntil && user.lockUntil > Date.now()) {
       const remainingMinutes = Math.ceil((user.lockUntil - Date.now()) / 60000);
       throw new Error(`Account is locked due to too many failed login attempts. Please try again in ${remainingMinutes} minutes.`);
     }
 
+    // Check for approval status on the authenticated user
     if (user.approvedStatus !== 'approved') {
       throw new Error(`Your account is currently ${user.approvedStatus}. Please contact support.`);
     }
 
-    const isMatch = await user.matchPassword(password);
-
-    if (!isMatch) {
-      user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
-      if (user.failedLoginAttempts >= 3) {
-        user.lockUntil = new Date(Date.now() + 5 * 60 * 60 * 1000);
-        user.failedLoginAttempts = 0;
-      }
-      await user.save();
-      throw new Error('Invalid credentials');
-    }
-
+    // 5. Reset failed login attempts for the successful user
     if (user.failedLoginAttempts > 0 || user.lockUntil) {
       user.failedLoginAttempts = 0;
       user.lockUntil = null;
       await user.save();
     }
 
+    // 6. Handle MFA
     if (user.mfaSecret) {
       if (!mfaCode) {
         return { mfaRequired: true, userId: user._id };
@@ -102,6 +122,7 @@ class AuthService {
       }
     }
 
+    // 7. Generate token and return response
     const token = generateToken(user, role);
 
     const userResponse = user.toObject();
