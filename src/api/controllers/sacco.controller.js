@@ -17,6 +17,15 @@ class SaccoController {
     }
   }
 
+  async getSaccoNames(req, res, next) {
+    try {
+      const result = await SaccoService.getSaccoNames();
+      res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getSaccos(req, res, next) {
     try {
       const result = await SaccoService.getSaccos();

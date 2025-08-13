@@ -65,6 +65,15 @@ class SaccoService {
   }
 
   /**
+   * @description Retrieves all Sacco names and their IDs
+   * @returns {Promise<Array<object>>}
+   */
+  async getSaccoNames() {
+    const saccos = await Sacco.find({}).select('name _id');
+    return { saccos };
+  }
+
+  /**
    * @description Deletes a Sacco
    * @param {string} id - The ID of the Sacco to delete
    * @returns {Promise<void>}

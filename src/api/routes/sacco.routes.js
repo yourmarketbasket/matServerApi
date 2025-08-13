@@ -8,6 +8,9 @@ const { authorize } = require('../middlewares/rbac.middleware');
 // Public routes for Sacco signup
 router.post('/signup', SaccoAuthController.signup);
 
+// Public route to get Sacco names and IDs
+router.get('/names', SaccoController.getSaccoNames);
+
 
 // Protected Sacco routes
 // Let's assume viewing saccos requires the same permission as adding one.
