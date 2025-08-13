@@ -15,6 +15,7 @@ router.get('/names', SaccoController.getSaccoNames);
 // Protected Sacco routes
 // Let's assume viewing saccos requires the same permission as adding one.
 router.get('/', protect, authorize('P023'), SaccoController.getSaccos);
+router.get('/:id', protect, authorize('P023'), SaccoController.getSaccoById);
 
 router.post('/', protect, authorize('P023'), SaccoController.createSacco);
 router.put('/:id', protect, authorize('P024'), SaccoController.updateSacco);

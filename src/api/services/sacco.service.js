@@ -74,8 +74,8 @@ class SaccoService {
    */
   async getSaccos() {
     console.log('Fetching all Saccos');
-    // TODO: Find all Saccos in the database
-    return { saccos: [{ name: 'SafarEasy Demo Sacco', status: 'approved' }] };
+    const saccos = await Sacco.find({});
+    return { saccos };
   }
 
   /**
@@ -85,6 +85,19 @@ class SaccoService {
   async getSaccoNames() {
     const saccos = await Sacco.find({}).select('name _id');
     return { saccos };
+  }
+
+  /**
+   * @description Retrieves a single Sacco by its ID
+   * @param {string} id - The ID of the Sacco
+   * @returns {Promise<object>}
+   */
+  async getSaccoById(id) {
+    const sacco = await Sacco.findById(id);
+    if (!sacco) {
+      throw new Error('Sacco not found');
+    }
+    return { sacco };
   }
 
   /**

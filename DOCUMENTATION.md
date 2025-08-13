@@ -844,7 +844,7 @@ This section covers endpoints for managing Saccos (Savings and Credit Co-operati
 
 #### `GET /api/v1/saccos`
 
-- **Description:** Retrieves a list of all Saccos.
+- **Description:** Retrieves a list of all Saccos with their full details.
 - **Authentication:** Protected.
 - **Permissions:** `P023` (Add Sacco - permission reused for viewing).
 - **Parameters:** None.
@@ -852,13 +852,18 @@ This section covers endpoints for managing Saccos (Savings and Credit Co-operati
   ```json
   {
     "success": true,
-    "data": [
-      {
-        "_id": "sacco_id",
-        "name": "Example Sacco",
-        "status": "approved"
-      }
-    ]
+    "data": {
+      "saccos": [
+        {
+          "_id": "sacco_id",
+          "name": "Example Sacco",
+          "status": "approved",
+          "email": "contact@examplesacco.com",
+          "phone": "1234567890",
+          // ... other Sacco fields
+        }
+      ]
+    }
   }
   ```
 - **Failure Response (500 Internal Server Error):**
@@ -866,6 +871,39 @@ This section covers endpoints for managing Saccos (Savings and Credit Co-operati
   {
     "success": false,
     "message": "Failed to retrieve Saccos"
+  }
+  ```
+
+---
+
+#### `GET /api/v1/saccos/:id`
+
+- **Description:** Retrieves the full details of a single Sacco by its ID.
+- **Authentication:** Protected.
+- **Permissions:** `P023`.
+- **Parameters (URL):**
+  - `id` (string, required): The ID of the Sacco to retrieve.
+- **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "data": {
+      "sacco": {
+        "_id": "sacco_id",
+        "name": "Example Sacco",
+        "status": "approved",
+        "email": "contact@examplesacco.com",
+        "phone": "1234567890",
+        // ... other Sacco fields
+      }
+    }
+  }
+  ```
+- **Failure Response (404 Not Found):**
+  ```json
+  {
+    "success": false,
+    "message": "Sacco not found"
   }
   ```
 
