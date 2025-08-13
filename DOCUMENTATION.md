@@ -1006,6 +1006,31 @@ This section covers endpoints for managing Saccos (Savings and Credit Co-operati
   }
   ```
 
+---
+
+#### `PUT /api/v1/saccos/:id/status`
+
+- **Description:** Updates the `approvedStatus` of a specific Sacco. This is an administrative action.
+- **Authentication:** Protected (Bearer Token).
+- **Permissions:** `P024` (Update Sacco).
+- **Parameters (URL):**
+  - `id` (string, required): The ID of the Sacco to update.
+- **Parameters (Body):**
+  - `status` (string, required): The new status. Must be one of: `pending`, `approved`, `suspended`, `blocked`.
+- **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "data": {
+      "sacco": {
+        "_id": "60d5f1b4e6b3f1b4e8b3f1b4",
+        "name": "SafarEasy Demo Sacco",
+        "approvedStatus": "approved"
+      }
+    }
+  }
+  ```
+
 ### Route
 
 This section covers endpoints for managing transportation routes.
@@ -1967,3 +1992,155 @@ The server uses Socket.IO for real-time communication. Events are either broadca
     -   **Payload**: `{ payroll: object }`
 
 ---
+
+### Owner
+
+This section covers endpoints for managing Owners.
+
+---
+
+#### `PUT /api/v1/owners/:id/status`
+
+- **Description:** Updates the `approvedStatus` of a specific Owner. This is an administrative action.
+- **Authentication:** Protected (Bearer Token).
+- **Permissions:** `P024` (Note: This permission might need to be more specific to Owners).
+- **Parameters (URL):**
+  - `id` (string, required): The ID of the Owner to update.
+- **Parameters (Body):**
+  - `status` (string, required): The new status. Must be one of: `pending`, `approved`, `suspended`, `blocked`.
+- **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "data": {
+      "owner": {
+        "_id": "60d0fe4f5311236168a109cc",
+        "name": "Jane Smith",
+        "approvedStatus": "suspended"
+      }
+    }
+  }
+  ```
+
+---
+
+### Vehicle Management (by Owner)
+
+The following endpoints allow an authenticated user with the role of 'Owner' to manage their own vehicles. All endpoints require a valid Bearer Token from an owner's login session.
+
+---
+
+#### `POST /api/v1/vehicles/owner`
+
+- **Description:** Registers a new vehicle under the authenticated owner's account.
+- **Authentication:** Protected (Owner's Bearer Token).
+- **Permissions:** Requires user to have 'Owner' role.
+- **Parameters (Body):**
+  - `licensePlate` (string, required): The vehicle's license plate number.
+  - `capacity` (number, required): The seating capacity of the vehicle.
+  - `saccoId` (string, required): The `_id` of the Sacco the vehicle belongs to.
+  - `condition` (string, required): The current condition of the vehicle.
+  - `class` (string, required): The class of the vehicle (`economy`, `business`, `first_class`).
+- **Success Response (201 Created):**
+  ```json
+  {
+    "success": true,
+    "data": {
+      "vehicle": {
+        "_id": "60d5f1b4e6b3f1b4e8b3f1c1",
+        "licensePlate": "KDA 123X",
+        "ownerId": "60d0fe4f5311236168a109cc",
+        "status": "active"
+      }
+    }
+  }
+  ```
+
+---
+
+#### `GET /api/v1/vehicles/owner`
+
+- **Description:** Retrieves a list of all vehicles registered under the authenticated owner's account.
+- **Authentication:** Protected (Owner's Bearer Token).
+- **Permissions:** Requires user to have 'Owner' role.
+- **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "data": {
+      "vehicles": [
+        {
+          "_id": "60d5f1b4e6b3f1b4e8b3f1c1",
+          "licensePlate": "KDA 123X",
+          "ownerId": "60d0fe4f5311236168a109cc",
+          "status": "active"
+        }
+      ]
+    }
+  }
+  ```
+
+---
+
+#### `PUT /api/v1/vehicles/owner/:id`
+
+- **Description:** Updates the details of a specific vehicle owned by the authenticated owner.
+- **Authentication:** Protected (Owner's Bearer Token).
+- **Permissions:** Requires user to have 'Owner' role.
+- **Parameters (URL):**
+  - `id` (string, required): The ID of the vehicle to update.
+- **Parameters (Body):**
+  - Any of the fields from the vehicle schema.
+- **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "data": {
+      "vehicle": {
+        "_id": "60d5f1b4e6b3f1b4e8b3f1c1",
+        "condition": "Needs service"
+      }
+    }
+  }
+  ```
+
+---
+
+#### `DELETE /api/v1/vehicles/owner/:id`
+
+- **Description:** Deletes a specific vehicle owned by the authenticated owner.
+- **Authentication:** Protected (Owner's Bearer Token).
+- **Permissions:** Requires user to have 'Owner' role.
+- **Parameters (URL):**
+  - `id` (string, required): The ID of the vehicle to delete.
+- **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "data": {}
+  }
+  ```
+
+---
+
+#### `PUT /api/v1/vehicles/owner/:id/status`
+
+- **Description:** Updates the status of a specific vehicle owned by the authenticated owner.
+- **Authentication:** Protected (Owner's Bearer Token).
+- **Permissions:** Requires user to have 'Owner' role.
+- **Parameters (URL):**
+  - `id` (string, required): The ID of the vehicle to update.
+- **Parameters (Body):**
+  - `status` (string, required): The new status (`active` or `grounded`).
+- **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "data": {
+      "vehicle": {
+        "_id": "60d5f1b4e6b3f1b4e8b3f1c1",
+        "status": "grounded"
+      }
+    }
+  }
+  ```

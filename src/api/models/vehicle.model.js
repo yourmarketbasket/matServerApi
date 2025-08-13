@@ -23,8 +23,13 @@ const VehicleSchema = new mongoose.Schema({
   },
   ownerId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // User with 'owner' role
+    ref: 'Owner',
     required: true,
+  },
+  status: {
+    type: String,
+    enum: ['active', 'grounded'],
+    default: 'active',
   },
   condition: {
     type: String,
