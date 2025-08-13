@@ -58,6 +58,7 @@ const baseSchema = new mongoose.Schema({
   gender: {
     type: String,
     enum: ['Male', 'Female', 'Other'],
+    set: v => v.charAt(0).toUpperCase() + v.slice(1).toLowerCase(),
   },
   device_details: {
     type: Object,
